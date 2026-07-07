@@ -840,7 +840,7 @@ function mealDayRow(d){
   const dt=new Date(d.date+"T00:00:00");
   const items=(d.items||[]).map(it=>{
     const kind=it.type==="meal"?"Meal":it.type==="childcare"?"Child care":"Help";
-    const who=it.person?`<b>${esc(it.person)}</b>`:'<span class="pill danger">Volunteer needed</span>';
+    const who=it.person?`<b>${esc(it.person)}</b>`:'<span class="pill" style="color:var(--rose);border:1px solid var(--rose-soft)">Volunteer needed</span>';
     return `<div class="row-sub">${kind}: ${who}${it.detail?" — "+esc(it.detail):""}</div>`;
   }).join("");
   return `<div class="row"><div class="appt-cal"><div class="m">${MON[dt.getMonth()]}</div><div class="d">${dt.getDate()}</div></div><div class="row-body"><div class="row-title">${DOW[dt.getDay()]}</div>${items}</div></div>`;
