@@ -470,7 +470,16 @@ if(!state._extrasV10){
     else seenT[t.title]=true;
   });
   state._extrasV11=1;saveLocal();
+}if(!state._extrasV12){
+  var FAKE_Q2=["Ask about safe pacing and positioning for feeds","Signs Roy is ready to try more by mouth?","Ask about EEG / seizure monitoring plan","Timing for follow-up MRI?","What signs should prompt us to call?","Which home exercises should be our daily 3?","Positioning to encourage head control?"];
+  (state.appointments||[]).forEach(function(a){
+    (a.questions||[]).forEach(function(q){
+      if(!q.deleted && FAKE_Q2.indexOf(q.text)!==-1){ q.deleted=true; q.updatedAt=now(); }
+    });
+  });
+  state._extrasV12=1; saveLocal();
 }
+
 
 let me=getMe();
 let route="today";
