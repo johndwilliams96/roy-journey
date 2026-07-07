@@ -431,6 +431,22 @@ if(!state._extrasV7){
   NOTES_V7.forEach(function(n){state.journal.push({id:uid(),type:"note",text:n.text,date:n.date,author:"",updatedAt:n.master?now():new Date(n.date+"T00:00:00").getTime()});});
   state._extrasV7=1;saveLocal();
 }
+if(!state._extrasV8){
+  state.meals={organizer:'Havilah Williams',family:'2 Adults, 1 Kid',location:'Olympia, WA',favorite:'Protein and vegetable focused meals',leastFavorite:'Carb-heavy meals',instructions:'We eat very small portions. Thank you so much for your help. Bless you!',link:'https://www.mealtrain.com/trains/8l6y1n',days:[
+      {date:'2026-07-06',items:[{type:'childcare',person:'Bethany Williams'},{type:'help',person:'Karen Ketron'},{type:'meal',person:'Susie Martucci',detail:'Greek spread'}]},
+      {date:'2026-07-07',items:[{type:'childcare',person:'Rachella Williams'},{type:'help',person:'Eva & Elise Martinez'},{type:'meal',person:'Bonnie Williams',detail:'Steak salad and sourdough bread'}]},
+      {date:'2026-07-08',items:[{type:'childcare',person:'Juanita Williams'},{type:'help',person:'Dorothy Hill'},{type:'meal',person:'Crystal Hier',detail:'Skillet roasted chicken and potatoes with Caesar salad'}]},
+      {date:'2026-07-09',items:[{type:'childcare',person:'Amy Williams'},{type:'help',person:'Michelle Snyder'},{type:'meal',person:'Katherine Ketron',detail:'Greek — Steak/Salad/Pitas'}]},
+      {date:'2026-07-10',items:[{type:'childcare',person:'Bethany Williams'},{type:'help',person:'Karen Ketron'},{type:'meal',person:'',detail:''}]},
+      {date:'2026-07-11',items:[{type:'meal',person:'',detail:''}]},
+      {date:'2026-07-13',items:[{type:'childcare',person:'Bethany Williams'},{type:'help',person:'Karen Ketron'},{type:'meal',person:'Rachella Williams',detail:'TBD'}]},
+      {date:'2026-07-14',items:[{type:'childcare',person:'Victoria Salinger'},{type:'help',person:'Eva & Elise Martinez'},{type:'meal',person:'Ellen Frost',detail:'Grilled Chicken, Caesar Salad, & Sourdough'}]},
+      {date:'2026-07-15',items:[{type:'childcare',person:'Juanita Williams'},{type:'help',person:'Juanita Williams'},{type:'meal',person:'Ruby Taylor',detail:'Greek yogurt marinated chicken with Caesar salad'}]},
+      {date:'2026-07-16',items:[{type:'childcare',person:'',detail:''},{type:'help',person:'Michelle Snyder'},{type:'meal',person:'Naomi Berg',detail:'Steak and roasted beets and burrata'}]},
+      {date:'2026-07-17',items:[{type:'childcare',person:'Bethany Williams'},{type:'help',person:'',detail:''},{type:'meal',person:'',detail:''}]}
+  ]};
+  state._extrasV8=1;saveLocal();
+}
 let me=getMe();
 let route="today";
 
@@ -769,7 +785,7 @@ function vProgress(){
 /* ---------- CARE ---------- */
 let careTab="appts";
 function vCare(){
-  const seg=`<div class="seg"><button class="${careTab==="appts"?"on":""}" data-ctab="appts">Appointments</button><button class="${careTab==="actions"?"on":""}" data-ctab="actions">Follow-ups</button><button class="${careTab==="team"?"on":""}" data-ctab="team">Team</button></div>`;
+  const seg=`<div class="seg"><button class="${careTab==="appts"?"on":""}" data-ctab="appts">Appointments</button><button class="${careTab==="actions"?"on":""}" data-ctab="actions">Follow-ups</button><button class="${careTab==="team"?"on":""}" data-ctab="team">Team</button><button class="${careTab==="meals"?"on":""}" data-ctab="meals">Meals</button></div>`;
   let body="";
   if(careTab==="appts"){
     const now2=new Date(new Date().toDateString());
@@ -793,6 +809,21 @@ function vCare(){
       <span class="tag ${a.status}">${a.status==="doing"?"in progress":a.status}</span></div>`).join("")}</div>`
       :`<div class="empty"><div class="ico">✅</div><h3>No follow-ups</h3><p>Track research and to-dos for Roy's care here.</p></div>`;
     body+=`<button class="add-inline" data-add="action"><span class="plus">+</span> Add a follow-up</button>`;
+  } else if(careTab==="meals"){
+    const mt=state.meals||{days:[]};
+    const mdays=(mt.days||[]).slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const mtk=todayKey(new Date());
+    const mUp=mdays.filter(d=>d.date>=mtk);
+    const mPast=mdays.filter(d=>d.date<mtk);
+    const infoCard=`<div class="card"><div class="row-body" style="padding:14px 16px">
+      <div class="row-title">🍽️ Meal Train — organized by ${esc(mt.organizer||"")}</div>
+      <div class="row-sub">Feeding: ${esc(mt.family||"")} · Drop-off: ${esc(mt.location||"")}</div>
+      ${mt.favorite?`<div class="row-sub">Loves: ${esc(mt.favorite)}</div>`:""}
+      ${mt.leastFavorite?`<div class="row-sub">Avoid: ${esc(mt.leastFavorite)}</div>`:""}
+      ${mt.instructions?`<div class="row-sub">“${esc(mt.instructions)}”</div>`:""}
+      ${mt.link?`<a class="add-inline" href="${esc(mt.link)}" target="_blank" rel="noopener"><span class="plus">↗</span> Open Meal Train to sign up or edit</a>`:""}
+    </div></div>`;
+    body=infoCard+(mUp.length?`<div class="sec"><h2>Upcoming</h2></div><div class="card">${mUp.map(mealDayRow).join("")}</div>`:`<div class="empty">No upcoming meal train dates.</div>`)+(mPast.length?`<div class="sec"><h2>Past</h2></div><div class="card">${mPast.map(mealDayRow).join("")}</div>`:"");
   } else {
     body=`<div class="card">${live(state.careTeam).map(c=>`<div class="row" data-edit-team="${c.id}"><div class="row-body"><div class="row-title">${esc(c.name||c.role||"New contact")}</div><div class="row-sub">${esc(c.name?c.role:"Tap to add name & contact")}${c.phone?" · "+esc(c.phone):""}</div></div><span class="chev">›</span></div>`).join("")}</div>
       <button class="add-inline" data-add="team"><span class="plus">+</span> Add a team member</button>`;
@@ -805,6 +836,15 @@ function apptRow(a){const d=a.when?new Date(a.when):null;const openQ=live(a.ques
     <div class="row-body"><div class="row-title">${esc(a.title)}${a.fromCalendar?` <span class="tag cal">calendar</span>`:""}</div>
       <div class="row-sub">${esc(a.provider||"")}${a.hasTime&&d?" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""}${openQ?" · ❓"+openQ:""}${vn?" · 📝"+vn:""}</div></div>
     <span class="chev">›</span></div>`}
+function mealDayRow(d){
+  const dt=new Date(d.date+"T00:00:00");
+  const items=(d.items||[]).map(it=>{
+    const kind=it.type==="meal"?"Meal":it.type==="childcare"?"Child care":"Help";
+    const who=it.person?`<b>${esc(it.person)}</b>`:'<span class="pill danger">Volunteer needed</span>';
+    return `<div class="row-sub">${kind}: ${who}${it.detail?" — "+esc(it.detail):""}</div>`;
+  }).join("");
+  return `<div class="row"><div class="appt-cal"><div class="m">${MON[dt.getMonth()]}</div><div class="d">${dt.getDate()}</div></div><div class="row-body"><div class="row-title">${DOW[dt.getDay()]}</div>${items}</div></div>`;
+}
 function qRow(x,scope){return `<div class="qitem ${x.done?"done":""}">
     <div class="row-tick" data-q="${scope}:${x.id}"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg></div>
     <div class="qtext" data-qedit="${scope}:${x.id}">${esc(x.text)}${x.author?`<div class="qmeta">— ${esc(x.author)}</div>`:""}</div>
