@@ -247,7 +247,7 @@ function seed(){
   const s={
     version:2,
     child:{name:"Roy",dob:"2026-05-25",diagnosis:"HIE (hypoxic-ischemic encephalopathy)",updatedAt:now()},
-    settings:{disclaimerSeen:false,sync:{url:"",key:"",family:""},updatedAt:now()},
+    settings:{disclaimerSeen:false,sync:{url:"https://zdbbvxasghsnikuesjgv.supabase.co",key:"sb_publishable_ltaNA7nnVozoSCOcZIjg",family:"roy-williams"},updatedAt:now()},
     therapies:[
       t("pt","Tummy time","Short, frequent sessions to build neck & trunk strength."),
       t("pt","Reaching across midline","Encourage one hand to cross to the other side."),
@@ -446,6 +446,14 @@ if(!state._extrasV8){
       {date:'2026-07-17',items:[{type:'childcare',person:'Bethany Williams'},{type:'help',person:'',detail:''},{type:'meal',person:'',detail:''}]}
   ]};
   state._extrasV8=1;saveLocal();
+}
+if(!state._extrasV9){
+  state.settings=state.settings||{};
+  state.settings.sync=state.settings.sync||{};
+  if(!state.settings.sync.url){state.settings.sync.url='https://zdbbvxasghsnikuesjgv.supabase.co';}
+  if(!state.settings.sync.key){state.settings.sync.key='sb_publishable_ltaNA7nnVozoSCOcZIjg';}
+  if(!state.settings.sync.family){state.settings.sync.family='roy-williams';}
+  state._extrasV9=1;saveLocal();
 }
 let me=getMe();
 let route="today";
