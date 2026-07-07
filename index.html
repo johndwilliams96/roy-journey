@@ -46,10 +46,14 @@ a{color:var(--sage-deep)}
 .top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .top-actions{display:flex;gap:8px;flex:none}
 .eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);font-weight:600}
-.greet{font-family:var(--fs);font-size:29px;line-height:1.12;font-weight:600;margin-top:5px;letter-spacing:-.01em;color:#fff}
+.greet{font-family:var(--fs);font-size:20px;line-height:1.12;font-weight:600;margin-top:5px;letter-spacing:-.01em;color:#fff}
 .greet em{font-style:italic;color:#fff}
 .top-btn{flex:none;width:42px;height:42px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;font-size:18px}
 .age-chip{display:inline-flex;gap:8px;align-items:center;margin-top:12px;background:var(--roy);color:#fff;padding:7px 13px;border-radius:100px;font-size:13.5px;font-weight:600}
+.brief-grid{margin:14px 0 4px;display:flex;flex-direction:column;gap:7px}
+.brief-item{display:flex;align-items:center;gap:9px;background:var(--surface);box-shadow:var(--shadow);border-radius:12px;padding:10px 14px;font-size:13.5px;color:var(--ink)}
+.brief-item span:first-child{flex:none;font-size:16px}
+
 .sync-chip{display:inline-flex;gap:7px;align-items:center;margin-top:12px;margin-left:8px;background:var(--surface);box-shadow:var(--shadow);color:var(--muted);padding:7px 12px;border-radius:100px;font-size:12.5px;font-weight:600}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
 .sync-dot.on{background:var(--sage)}
@@ -248,21 +252,7 @@ function seed(){
     version:2,
     child:{name:"Roy",dob:"2026-05-25",diagnosis:"HIE (hypoxic-ischemic encephalopathy)",updatedAt:now()},
     settings:{disclaimerSeen:false,sync:{url:"https://zdbbvxasghsnikuesjgv.supabase.co",key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkYmJ2eGFzZ2hzbmlrdWVzamd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MzY0MTksImV4cCI6MjA5OTAxMjQxOX0.yMyAfa5wF912Au3isc5iRgdDpTLgi4aZyKJCWNPSzYQ",family:"roy-williams"},updatedAt:now()},
-    therapies:[
-      t("pt","Tummy time","Short, frequent sessions to build neck & trunk strength."),
-      t("pt","Reaching across midline","Encourage one hand to cross to the other side."),
-      t("pt","Gentle range-of-motion","The stretches Roy's PT showed you."),
-      t("pt","Supported sitting practice","Prop-sitting with support, as tolerated."),
-      t("ot","Hands to midline play","Bring both hands together at the center."),
-      t("ot","Grasp & release toys","Varied textures, easy-to-hold objects."),
-      t("ot","Sensory exploration","Safe textures, temperatures, sounds."),
-      t("sp","Face-to-face talking","Narrate your day, close and slow."),
-      t("sp","Serve & return turns","Pause, wait for Roy's response, copy his sounds."),
-      t("sp","Read aloud","High-contrast board books, expressive voice."),
-      t("fe","Oral-motor & feeding play","Positioning & cues from your feeding therapist."),
-      t("vi","Visual tracking","Slowly move a face or high-contrast toy side to side."),
-      t("se","Calming routine","Predictable soothing — rocking, deep pressure, quiet.")
-    ],
+    therapies:[],
     logs:{}, todayPlan:{},
     milestones:[
       m("pt","Lifts head during tummy time"),m("pt","Holds head steady when upright"),m("pt","Rolls over"),
@@ -385,7 +375,7 @@ function applyExtras(){
 }
 
 let state=loadLocal();
-if(!state){state=seed();state.appointments=seedAppointments();saveLocal();}
+if(!state){state=seed();state.appointments=[];saveLocal();}
 if(!state.feeding)state.feeding={enabled:true,amount:90,unit:"mL",step:5,day:4,lastBumped:"",history:[],updatedAt:now()};
 else{if(state.feeding.unit==null)state.feeding.unit="mL";if(!state.feeding.amount){state.feeding.amount=90;state.feeding.updatedAt=now();}if(!state.feeding.step)state.feeding.step=5;}
 if(!state.gcal)state.gcal={clientId:"",calendarId:"",calendarName:"",keywords:"",jadonKeywords:"Jadon",lastSync:0,updatedAt:now()};
@@ -462,7 +452,26 @@ if(!state._extrasV10){
   state.settings.sync.key='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpkYmJ2eGFzZ2hzbmlrdWVzamd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MzY0MTksImV4cCI6MjA5OTAxMjQxOX0.yMyAfa5wF912Au3isc5iRgdDpTLgi4aZyKJCWNPSzYQ';
   if(!state.settings.sync.family){state.settings.sync.family='roy-williams';}
   state._extrasV10=1;saveLocal();
+}if(!state._extrasV11){
+  var FAKE_Q=["Ask about safe pacing and positioning for feeds","Signs Roy is ready to try more by mouth?","Ask about EEG / seizure monitoring plan","Timing for follow-up MRI?","What signs should prompt us to call?","Which home exercises should be our daily 3?","Positioning to encourage head control?"];
+  var GENERIC_T=["Tummy time","Reaching across midline","Gentle range-of-motion","Supported sitting practice","Hands to midline play","Grasp & release toys","Sensory exploration","Face-to-face talking","Serve & return turns","Read aloud","Oral-motor & feeding play","Visual tracking","Calming routine"];
+  (state.appointments||[]).forEach(function(a){
+    if((a.calId||"").indexOf("cal-")===0){a.deleted=true;a.updatedAt=now();}
+    if(Array.isArray(a.questions)&&a.questions.length){
+      var kept=a.questions.filter(function(q){return FAKE_Q.indexOf(q.text)===-1});
+      if(kept.length!==a.questions.length){a.questions=kept;a.updatedAt=now();}
+    }
+  });
+  var seenT={};
+  (state.therapies||[]).forEach(function(t){
+    if(GENERIC_T.indexOf(t.title)!==-1){t.deleted=true;t.updatedAt=now();return;}
+    if(t.deleted)return;
+    if(seenT[t.title]){t.deleted=true;t.updatedAt=now();}
+    else seenT[t.title]=true;
+  });
+  state._extrasV11=1;saveLocal();
 }
+
 let me=getMe();
 let route="today";
 
@@ -646,10 +655,25 @@ function vToday(){
 
   const meBanner = !me ? `<div class="note" style="margin-top:16px"><b>Who's using this device?</b> Set your name in ⚙ so shared notes show who wrote them. <span class="small-link" data-settings>Set name</span></div>`:"";
 
-  return `${header(salut+",",`Let's help <em>${esc(name)}</em><br>grow today`,`<button class="top-btn" data-settings aria-label="Settings">⚙</button>`)}
+  const todayFull=DOWFULL[new Date().getDay()]+", "+MON[new Date().getMonth()]+" "+new Date().getDate();
+  const ageMY=!age?"":age.months<1?"under 1 month old":age.months<24?age.months+(age.months===1?" month":" months")+" old":(function(){var y=Math.floor(age.months/12),m=age.months%12;return y+(y>1?" years":" year")+(m?" "+m+"m":"")+" old"})();
+  const nextBrief=next?esc(next.title)+(next.hasTime?" · "+new Date(next.when).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""):"Nothing scheduled";
+  const feed2=state.feeding||{};
+  const feedBrief=feed2.amount?feed2.amount+" "+(feed2.unit||"mL"):"Not set";
+  const mealDay=((state.meals&&state.meals.days)||[]).find(d=>d.date===dk);
+  const visitors=mealDay?mealDay.items.filter(it=>it.type!=="meal"):[];
+  const visitBrief=visitors.length?visitors.map(it=>esc(it.person||"Volunteer needed")+" ("+(it.type==="childcare"?"Jadon's playmate":"helper")+")").join(", "):"No one scheduled";
+  const dinnerItem=mealDay?mealDay.items.find(it=>it.type==="meal"):null;
+  const dinnerBrief=dinnerItem?esc(dinnerItem.person||"Volunteer needed")+(dinnerItem.detail?" — "+esc(dinnerItem.detail):""):"Not yet scheduled";
+  return `${header(todayFull,esc(name)+(ageMY?" · "+ageMY:""),`<button class="top-btn" data-settings aria-label="Settings">⚙</button>`)}
   <div class="view">
-    ${age?`<span class="age-chip">🎂 ${esc(name)} is ${ageLabel(age)}</span>`:""}
-    <span class="sync-chip"><span class="sync-dot ${Sync.status==="on"?"on":Sync.status==="err"?"err":""}"></span><span>${Sync.status==="on"?"Synced":Sync.status==="err"?"Sync error":"Local only"}</span></span>
+    <div class="brief-grid">
+      <div class="brief-item"><span>📅</span><span>${nextBrief}</span></div>
+      <div class="brief-item"><span>🍼</span><span>${feedBrief}</span></div>
+      <div class="brief-item"><span>🧑‍🤝‍🧑</span><span>${visitBrief}</span></div>
+      <div class="brief-item"><span>🍽️</span><span>${dinnerBrief}</span></div>
+    </div>
+    <span class="sync-chip" style="margin-top:8px"><span class="sync-dot ${Sync.status==="on"?"on":Sync.status==="err"?"err":""}"></span><span>${Sync.status==="on"?"Synced":Sync.status==="err"?"Sync error":"Local only"}</span></span>
     ${meBanner}
     ${!state.settings.disclaimerSeen?`<div class="note" style="margin-top:16px"><b>A gentle note.</b> These activities support — they don't replace — Roy's care team. Check new exercises with his therapists, and celebrate progress on his own timeline. <span class="small-link" id="dismissNote">Got it</span></div>`:""}
 
