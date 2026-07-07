@@ -1110,8 +1110,9 @@ function bindView(){
 }
 
 /* ============================ Sheet ============================ */
-function openSheet(html){const s=$("#sheet"),sc=$("#scrim");s.innerHTML=`<div class="grab"></div>`+html;sc.classList.add("show");requestAnimationFrame(()=>s.classList.add("show"));sc.onclick=closeSheet;s.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeSheet)}
-function closeSheet(){const s=$("#sheet"),sc=$("#scrim");s.classList.remove("show");sc.classList.remove("show");setTimeout(()=>s.innerHTML="",300)}
+function openSheet(html){clearTimeout(sheetCloseTimer);const s=$("#sheet"),sc=$("#scrim");s.innerHTML=`<div class="grab"></div>`+html;sc.classList.add("show");requestAnimationFrame(()=>s.classList.add("show"));sc.onclick=closeSheet;s.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeSheet)}
+let sheetCloseTimer=null;
+function closeSheet(){const s=$("#sheet"),sc=$("#scrim");s.classList.remove("show");sc.classList.remove("show");clearTimeout(sheetCloseTimer);sheetCloseTimer=setTimeout(()=>s.innerHTML="",300)}
 function val(id){const e=$("#"+id);return e?e.value.trim():""}
 
 /* ---- Today's 3 picker ---- */
