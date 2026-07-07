@@ -478,7 +478,26 @@ if(!state._extrasV10){
     });
   });
   state._extrasV12=1; saveLocal();
-}
+}(function(){
+  var seen={};
+  (state.therapies||[]).forEach(function(t){
+    if(t.deleted)return;
+    if(seen[t.title]){t.deleted=true;t.updatedAt=now();}
+    else seen[t.title]=true;
+  });
+  var seenA={};
+  (state.appointments||[]).forEach(function(a){
+    if(a.deleted)return;
+    var k=a.title+"|"+a.when;
+    if(seenA[k]){
+      var keep=seenA[k];
+      (a.questions||[]).forEach(function(q){ keep.questions=keep.questions||[]; keep.questions.push(q); });
+      a.deleted=true;a.updatedAt=now();
+    } else seenA[k]=a;
+  });
+  saveLocal();
+})();
+
 
 
 let me=getMe();
