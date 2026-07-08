@@ -669,16 +669,26 @@ function vToday(){
   {
     const weekEnd=new Date(); weekEnd.setDate(weekEnd.getDate()+7); weekEnd.setHours(23,59,59,999);
     const weekAppts=upcoming.filter(a=>new Date(a.when)<=weekEnd);
-    if(weekAppts.length){
-      apptCard=`<div class="card">`+weekAppts.map(a=>{
-        const d=new Date(a.when);
-        const days=Math.round((new Date(d.toDateString())-new Date(new Date().toDateString()))/86400000);
-        const cd=days===0?"Today":days===1?"Tomorrow":`in ${days} days`;
-        return `<div class="row" data-open-appt="${a.id}">
+    const tk2=todayKey();
+    const todayAppts=weekAppts.filter(a=>(a.when||"").slice(0,10)===tk2);
+    const restAppts=weekAppts.filter(a=>(a.when||"").slice(0,10)!==tk2);
+    const apptRow=a=>{
+      const d=new Date(a.when);
+      const days=Math.round((new Date(d.toDateString())-new Date(new Date().toDateString()))/86400000);
+      const cd=days===0?"Today":days===1?"Tomorrow":`in ${days} days`;
+      return `<div class="row" data-open-appt="${a.id}">
       <div class="appt-cal" style="width:52px"><div class="m">${MON[d.getMonth()]}</div><div class="d">${d.getDate()}</div></div>
       <div class="row-body"><div class="row-title">${esc(a.title)}</div><div class="row-sub">${esc(a.provider||"")}${a.hasTime?" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""} · ${cd}</div></div>
       <span class="chev">›</span></div>`;
-      }).join("")+`</div>`;
+    };
+    if(weekAppts.length){
+      apptCard="";
+      if(todayAppts.length){
+        apptCard+=`<div class="subhead" style="margin:0 0 6px">Today</div><div class="card" style="margin-bottom:12px">${todayAppts.map(apptRow).join("")}</div>`;
+      }
+      if(restAppts.length){
+        apptCard+=`<div class="subhead">This week</div><div class="card">${restAppts.map(apptRow).join("")}</div>`;
+      }
     } else {
       apptCard=`<div class="card"><div class="mini-note">📅 No upcoming appointments this week — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div></div>`;
     }
