@@ -495,6 +495,13 @@ if(!state._extrasV10){
       a.deleted=true;a.updatedAt=now();
     } else seenA[k]=a;
   });
+  var seenH={};
+  (state.horizon||[]).forEach(function(h){
+    if(h.deleted)return;
+    var k=(h.title||"").toLowerCase();
+    if(seenH[k]){h.deleted=true;h.updatedAt=now();}
+    else seenH[k]=true;
+  });
   saveLocal();
 })();
 
@@ -659,19 +666,22 @@ function vToday(){
   const upcoming=live(state.appointments).filter(a=>a.when&&new Date(a.when)>=new Date(new Date().toDateString())).sort((a,b)=>new Date(a.when)-new Date(b.when));
   const next=upcoming[0];
   let apptCard;
-  if(next){
-    const d=new Date(next.when);
-    const days=Math.round((new Date(d.toDateString())-new Date(new Date().toDateString()))/86400000);
-    const cd=days===0?"Today":days===1?"Tomorrow":`in ${days} days`;
-    const openQ=live(next.questions).filter(x=>!x.done).length;
-    apptCard=`<div class="card" data-open-appt="${next.id}">
-      <div class="appt-next"><div class="appt-cal"><div class="m">${MON[d.getMonth()]}</div><div class="d">${d.getDate()}</div></div>
-        <div class="appt-info"><div class="t">${esc(next.title)}</div>
-          <div class="s">${esc(next.provider||"")}${next.hasTime?" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""}</div></div>
-        <div class="countdown">${cd}</div></div>
-      <div class="mini-note" style="margin-top:12px">❓ ${openQ? openQ+" question"+(openQ>1?"s":"")+" ready to discuss" : "No questions yet — tap to add some"}</div></div>`;
-  } else {
-    apptCard=`<div class="card"><div class="mini-note">📅 No upcoming appointments — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div></div>`;
+  {
+    const weekEnd=new Date(); weekEnd.setDate(weekEnd.getDate()+7); weekEnd.setHours(23,59,59,999);
+    const weekAppts=upcoming.filter(a=>new Date(a.when)<=weekEnd);
+    if(weekAppts.length){
+      apptCard=`<div class="card">`+weekAppts.map(a=>{
+        const d=new Date(a.when);
+        const days=Math.round((new Date(d.toDateString())-new Date(new Date().toDateString()))/86400000);
+        const cd=days===0?"Today":days===1?"Tomorrow":`in ${days} days`;
+        return `<div class="row" data-open-appt="${a.id}">
+      <div class="appt-cal" style="width:52px"><div class="m">${MON[d.getMonth()]}</div><div class="d">${d.getDate()}</div></div>
+      <div class="row-body"><div class="row-title">${esc(a.title)}</div><div class="row-sub">${esc(a.provider||"")}${a.hasTime?" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""} · ${cd}</div></div>
+      <span class="chev">›</span></div>`;
+      }).join("")+`</div>`;
+    } else {
+      apptCard=`<div class="card"><div class="mini-note">📅 No upcoming appointments this week — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div></div>`;
+    }
   }
 
   const todayList=plan.length?plan.map(t=>{const d=DOMAINS[t.domain];const done=!!log[t.id];
@@ -714,7 +724,7 @@ function vToday(){
     ${feedingCard()}
     ${suppliesCard()}
     ${jadonTodayCard()}
-    <div class="sec"><h2>Next visit</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
+    <div class="sec"><h2>Next visits</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
     ${apptCard}
 
     ${horizonCard()}
@@ -936,7 +946,19 @@ function vRoadmap(){return `${header("Roadmap","The road ahead")}<div class="vie
 /* ---------- JADON schedule ---------- */
 function byWhen(a,b){return (a.when||"").localeCompare(b.when||"")}
 function jTime(e){if(!e.when)return "";if(!e.hasTime)return "All day";const d=new Date(e.when);return d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
-function jadonToday(){const tk=todayKey();return live(state.jadonSchedule).filter(e=>(e.when||"").slice(0,10)===tk).sort(byWhen)}
+function jadonMealEvents(){
+  var days=(state.meals&&state.meals.days)||[];
+  var out=[];
+  days.forEach(function(d){
+    (d.items||[]).forEach(function(it){
+      if(it.type==="childcare"||it.type==="help"){
+        out.push({id:"meal-"+d.date+"-"+it.type,title:(it.person||"Volunteer needed")+" — "+(it.type==="childcare"?"Playmate for Jadon":"All-day helper")+(it.detail?" ("+it.detail+")":""),when:d.date,hasTime:false,fromCalendar:true,location:""});
+      }
+    });
+  });
+  return out;
+}
+function jadonToday(){const tk=todayKey();return live(state.jadonSchedule).concat(jadonMealEvents()).filter(e=>(e.when||"").slice(0,10)===tk).sort(byWhen)}
 function jadonTodayCard(){
   const list=jadonToday();
   const inner=list.length?list.map(e=>`<div class="row" ${e.fromCalendar?"":`data-jadon="${e.id}"`}>
@@ -948,7 +970,7 @@ function jadonTodayCard(){
 }
 function vJadon(){
   const tk=todayKey();
-  const evs=live(state.jadonSchedule);
+  const evs=live(state.jadonSchedule).concat(jadonMealEvents());
   const todays=evs.filter(e=>(e.when||"").slice(0,10)===tk).sort(byWhen);
   const upcoming=evs.filter(e=>(e.when||"").slice(0,10)>tk).sort(byWhen);
   const byDay={}; upcoming.forEach(e=>{const d=(e.when||"").slice(0,10);(byDay[d]=byDay[d]||[]).push(e)});
@@ -961,7 +983,7 @@ function vJadon(){
   if(days.length){body+=`<div class="sec jadon"><h2>Coming up</h2></div>`+days.map(d=>{const dd=new Date(d+"T00:00:00");
     return `<div class="card"><div class="subhead" style="margin:2px 0 6px">${DOW[dd.getDay()]}, ${MON[dd.getMonth()]} ${dd.getDate()}</div>${byDay[d].map(row).join("")}</div>`}).join("");}
   return `${header("Jadon","His schedule",null,"jadon")}<div class="view">
-    <div class="note">Jadon's schedule from your shared Google Calendar. Add anything extra by hand below. ${state.gcal&&state.gcal.calendarId?"":"Connect Google Calendar in ⚙ to pull it in automatically."}</div>
+    <div class="note">Includes childcare & helper sign-ups from your Meal Train, plus anything from your shared Google Calendar or added by hand below. ${state.gcal&&state.gcal.calendarId?"":"Connect Google Calendar in ⚙ to pull that in too."}</div>
     ${body}
     <button class="add-inline" data-add-jadon><span class="plus">+</span> Add to Jadon's schedule</button>
     <div class="foot">Tip: name calendar events with "Jadon" so they land here instead of Roy's appointments.</div></div>`;
