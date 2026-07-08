@@ -677,18 +677,19 @@ function vToday(){
       const days=Math.round((new Date(d.toDateString())-new Date(new Date().toDateString()))/86400000);
       const cd=days===0?"Today":days===1?"Tomorrow":`in ${days} days`;
       return `<div class="row" data-open-appt="${a.id}">
-      <div class="appt-cal" style="width:52px"><div class="m">${MON[d.getMonth()]}</div><div class="d">${d.getDate()}</div></div>
+      <div class="appt-cal" style="width:52px"><div class="m">${DOW[d.getDay()]}</div><div class="d">${d.getDate()}</div></div>
       <div class="row-body"><div class="row-title">${esc(a.title)}</div><div class="row-sub">${esc(a.provider||"")}${a.hasTime?" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""} · ${cd}</div></div>
       <span class="chev">›</span></div>`;
     };
     if(weekAppts.length){
-      apptCard="";
+      let inner="";
       if(todayAppts.length){
-        apptCard+=`<div class="subhead" style="margin:0 0 6px">Today</div><div class="card" style="margin-bottom:12px">${todayAppts.map(apptRow).join("")}</div>`;
+        inner+=`<div class="subhead" style="margin:0 0 6px">Today</div>${todayAppts.map(apptRow).join("")}`;
       }
       if(restAppts.length){
-        apptCard+=`<div class="subhead">This week</div><div class="card">${restAppts.map(apptRow).join("")}</div>`;
+        inner+=`<div class="subhead" style="margin:${todayAppts.length?"18px":"0"} 0 6px">This week</div>${restAppts.map(apptRow).join("")}`;
       }
+      apptCard=`<div class="card">${inner}</div>`;
     } else {
       apptCard=`<div class="card"><div class="mini-note">📅 No upcoming appointments this week — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div></div>`;
     }
