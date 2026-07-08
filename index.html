@@ -479,28 +479,53 @@ if(!state._extrasV10){
   });
   state._extrasV12=1; saveLocal();
 }(function(){
-  var seen={};
-  (state.therapies||[]).forEach(function(t){
-    if(t.deleted)return;
-    if(seen[t.title]){t.deleted=true;t.updatedAt=now();}
-    else seen[t.title]=true;
+  var GENERIC_T=["Tummy time","Reaching across midline","Gentle range-of-motion","Supported sitting practice","Hands to midline play","Grasp & release toys","Sensory exploration","Face-to-face talking","Serve & return turns","Read aloud","Oral-motor & feeding play","Visual tracking","Calming routine"];
+  function keeperOf(g){var k=g[0];g.forEach(function(x){if((x.updatedAt||0)>(k.updatedAt||0))k=x;});return k;}
+  var tGroups={};
+  (state.therapies||[]).forEach(function(t){(tGroups[t.title]=tGroups[t.title]||[]).push(t);});
+  Object.keys(tGroups).forEach(function(title){
+    var g=tGroups[title];
+    if(GENERIC_T.indexOf(title)!==-1){
+      g.forEach(function(t){if(!t.deleted){t.deleted=true;t.updatedAt=now();}});
+      return;
+    }
+    var live=g.filter(function(t){return !t.deleted;});
+    if(live.length===1)return;
+    var keeper;
+    if(live.length>1){ keeper=keeperOf(live); }
+    else { keeper=keeperOf(g); keeper.deleted=false; keeper.updatedAt=now(); }
+    g.forEach(function(t){ if(t!==keeper && !t.deleted){ t.deleted=true; t.updatedAt=now(); } });
   });
-  var seenA={};
-  (state.appointments||[]).forEach(function(a){
-    if(a.deleted)return;
-    var k=a.title+"|"+a.when;
-    if(seenA[k]){
-      var keep=seenA[k];
-      (a.questions||[]).forEach(function(q){ keep.questions=keep.questions||[]; keep.questions.push(q); });
-      a.deleted=true;a.updatedAt=now();
-    } else seenA[k]=a;
+  var aGroups={};
+  (state.appointments||[]).forEach(function(a){var k=a.title+"|"+a.when;(aGroups[k]=aGroups[k]||[]).push(a);});
+  Object.keys(aGroups).forEach(function(k){
+    var g=aGroups[k];
+    if(g.length<2)return;
+    var live=g.filter(function(a){return !a.deleted;});
+    if(live.length===1)return;
+    var keeper;
+    if(live.length>1){ keeper=keeperOf(live); }
+    else { keeper=keeperOf(g); keeper.deleted=false; keeper.updatedAt=now(); }
+    g.forEach(function(a){
+      if(a===keeper)return;
+      (a.questions||[]).forEach(function(q){
+        keeper.questions=keeper.questions||[];
+        if(!keeper.questions.some(function(kq){return kq.id===q.id;})) keeper.questions.push(q);
+      });
+      if(!a.deleted){ a.deleted=true; a.updatedAt=now(); }
+    });
   });
-  var seenH={};
-  (state.horizon||[]).forEach(function(h){
-    if(h.deleted)return;
-    var k=(h.title||"").toLowerCase();
-    if(seenH[k]){h.deleted=true;h.updatedAt=now();}
-    else seenH[k]=true;
+  var hGroups={};
+  (state.horizon||[]).forEach(function(h){var k=(h.title||"").toLowerCase();(hGroups[k]=hGroups[k]||[]).push(h);});
+  Object.keys(hGroups).forEach(function(k){
+    var g=hGroups[k];
+    if(g.length<2)return;
+    var live=g.filter(function(h){return !h.deleted;});
+    if(live.length===1)return;
+    var keeper;
+    if(live.length>1){ keeper=keeperOf(live); }
+    else { keeper=keeperOf(g); keeper.deleted=false; keeper.updatedAt=now(); }
+    g.forEach(function(h){ if(h!==keeper && !h.deleted){ h.deleted=true; h.updatedAt=now(); } });
   });
   saveLocal();
 })();
