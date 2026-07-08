@@ -238,6 +238,7 @@ const now=()=>Date.now();
 const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 function todayKey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function effectiveDateKey(){var n=new Date();if(n.getHours()>18||(n.getHours()===18&&n.getMinutes()>=30)){n.setDate(n.getDate()+1);}return todayKey(n);}
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2200)}
 function live(a){return (a||[]).filter(x=>!x.deleted)}
@@ -734,7 +735,8 @@ function vToday(){
   const nextBrief=next?esc(next.title)+(next.hasTime?" · "+new Date(next.when).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""):"Nothing scheduled";
   const feed2=state.feeding||{};
   const feedBrief=feed2.amount?feed2.amount+" "+(feed2.unit||"mL"):"Not set";
-  const mealDay=((state.meals&&state.meals.days)||[]).find(d=>d.date===dk);
+  const edk=effectiveDateKey();
+  const mealDay=((state.meals&&state.meals.days)||[]).find(d=>d.date===edk);
   const visitors=mealDay?mealDay.items.filter(it=>it.type!=="meal"):[];
   const visitBrief=visitors.length?visitors.map(it=>esc(it.person||"Volunteer needed")+" ("+(it.type==="childcare"?"Jadon's playmate":"helper")+")").join(", "):"No one scheduled";
   const dinnerItem=mealDay?mealDay.items.find(it=>it.type==="meal"):null;
@@ -994,7 +996,7 @@ function jadonMealEvents(){
   });
   return out;
 }
-function jadonToday(){const tk=todayKey();return live(state.jadonSchedule).concat(jadonMealEvents()).filter(e=>(e.when||"").slice(0,10)===tk).sort(byWhen)}
+function jadonToday(){const tk=effectiveDateKey();return live(state.jadonSchedule).concat(jadonMealEvents()).filter(e=>(e.when||"").slice(0,10)===tk).sort(byWhen)}
 function jadonTodayCard(){
   const list=jadonToday();
   const inner=list.length?list.map(e=>`<div class="row" ${e.fromCalendar?"":`data-jadon="${e.id}"`}>
@@ -1005,7 +1007,7 @@ function jadonTodayCard(){
   return `<div class="sec jadon"><h2>Jadon today</h2><span class="link-btn" data-go="jadon">Full schedule</span></div><div class="card">${inner}</div>`;
 }
 function vJadon(){
-  const tk=todayKey();
+  const tk=effectiveDateKey();
   const evs=live(state.jadonSchedule).concat(jadonMealEvents());
   const todays=evs.filter(e=>(e.when||"").slice(0,10)===tk).sort(byWhen);
   const upcoming=evs.filter(e=>(e.when||"").slice(0,10)>tk).sort(byWhen);
