@@ -692,7 +692,7 @@ function vToday(){
   const streakMsg=onDays===0?"A fresh week to begin 🌱":onDays>=6?`You showed up ${onDays} of 7 days 🌿`:`${onDays} of the last 7 days — every bit counts`;
 
   const upcoming=live(state.appointments).filter(a=>a.when&&new Date(a.when)>=new Date(new Date().toDateString())).sort((a,b)=>new Date(a.when)-new Date(b.when));
-  let apptCard,apptSectionTitle;
+  let apptCardToday,apptCardWeek,apptSectionTitle;
   {
     const weekEnd=new Date(); weekEnd.setDate(weekEnd.getDate()+7); weekEnd.setHours(23,59,59,999);
     const weekAppts=upcoming.filter(a=>new Date(a.when)<=weekEnd);
@@ -709,16 +709,12 @@ function vToday(){
       <div class="row-body"><div class="row-title">${esc(a.title)}</div><div class="row-sub">${esc(a.provider||"")}${a.hasTime?" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""} · ${cd}</div></div>
       <span class="chev">›</span></div>`;
     };
-    let inner="";
     if(focusAppts.length){
-      inner+=focusAppts.map(apptRow).join("");
+      apptCardToday=`<div class="card">${focusAppts.map(apptRow).join("")}</div>`;
     } else {
-      inner+=`<div class="mini-note" style="margin:0">📅 No appointments ${isShift?"tomorrow":"today"} — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div>`;
+      apptCardToday=`<div class="card"><div class="mini-note" style="margin:0">📅 No appointments ${isShift?"tomorrow":"today"} — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div></div>`;
     }
-    if(restAppts.length){
-      inner+=`<div class="subhead" style="margin:${focusAppts.length?"18px":"0"} 0 6px">This week</div>${restAppts.map(apptRow).join("")}`;
-    }
-    apptCard=`<div class="card">${inner}</div>`;
+    apptCardWeek=restAppts.length?`<div class="card">${restAppts.map(apptRow).join("")}</div>`:null;
   }
 
   const LASER_SESSIONS=[{id:"laser1",label:"Session 1"},{id:"laser2",label:"Session 2"},{id:"laser3",label:"Session 3"},{id:"laser4",label:"Session 4"}];
@@ -752,11 +748,6 @@ function vToday(){
   const dinnerItem=mealDay?mealDay.items.find(it=>it.type==="meal"):null;
   const dinnerBrief=dinnerItem?`<b>Dinner:</b> ${esc(dinnerItem.person||"Volunteer needed")}${dinnerItem.detail?" — "+esc(dinnerItem.detail):""}`:`<b>Dinner:</b> Not yet scheduled`;
   return `${header(todayFull,esc(name)+(ageMY?" · "+ageMY:""),`<button class="top-btn" data-settings aria-label="Settings">⚙</button>`)}
-  <div class="view" style="padding-bottom:0">
-    <div class="sec" style="margin-top:16px"><h2>${apptSectionTitle}</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
-    ${apptCard}
-    ${feedingCard()}
-  </div>
   <div class="view">
     <div class="brief-grid">
       <div class="brief-item"><span>🍼</span><span>${feedBrief}</span></div>
@@ -768,7 +759,13 @@ function vToday(){
     ${meBanner}
     ${!state.settings.disclaimerSeen?`<div class="note" style="margin-top:16px"><b>A gentle note.</b> These activities support — they don't replace — Roy's care team. Check new exercises with his therapists, and celebrate progress on his own timeline. <span class="small-link" id="dismissNote">Got it</span></div>`:""}
 
-    <div class="sec"><h2>Today's 3</h2><span class="link-btn" data-plan>Change</span></div>
+    <div class="sec" style="margin-top:16px"><h2>${apptSectionTitle}</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
+    ${apptCardToday}
+    ${apptCardWeek?`<div class="sec"><h2>This week</h2></div>${apptCardWeek}`:""}
+
+    ${feedingCard()}
+
+    <div class="sec"><h2>Today's 3</h2><span<div class="sec"><h2>Today's 3</h2><span class="link-btn" data-plan>Change</span></div>
     <div class="card"><div class="bar"><i style="width:${pct}%"></i></div>
       <div style="margin-top:14px">${todayList}</div></div>
 
