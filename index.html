@@ -761,7 +761,6 @@ function vToday(){
 
     <div class="sec" style="margin-top:16px"><h2>${apptSectionTitle}</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
     ${apptCardToday}
-    ${apptCardWeek?`<div class="sec"><h2>This week</h2></div>${apptCardWeek}`:""}
 
     ${feedingCard()}
 
@@ -775,6 +774,8 @@ function vToday(){
 
     ${suppliesCard()}
     ${jadonTodayCard()}
+
+    ${apptCardWeek?`<div class="sec"><h2>This week</h2></div>${apptCardWeek}`:""}
 
     ${horizonCard()}
 
