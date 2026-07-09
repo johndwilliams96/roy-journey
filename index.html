@@ -751,12 +751,12 @@ function vToday(){
   const helperBrief=`<b>Helper:</b> ${helperItem?esc(helperItem.person||"Volunteer needed"):"No one scheduled"}`;
   const dinnerItem=mealDay?mealDay.items.find(it=>it.type==="meal"):null;
   const dinnerBrief=dinnerItem?`<b>Dinner:</b> ${esc(dinnerItem.person||"Volunteer needed")}${dinnerItem.detail?" — "+esc(dinnerItem.detail):""}`:`<b>Dinner:</b> Not yet scheduled`;
-  return `<div class="view" style="padding-top:env(safe-area-inset-top)">
-    <div class="sec" style="margin-top:14px"><h2>${apptSectionTitle}</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
+  return `${header(todayFull,esc(name)+(ageMY?" · "+ageMY:""),`<button class="top-btn" data-settings aria-label="Settings">⚙</button>`)}
+  <div class="view" style="padding-bottom:0">
+    <div class="sec" style="margin-top:16px"><h2>${apptSectionTitle}</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
     ${apptCard}
     ${feedingCard()}
   </div>
-  ${header(todayFull,esc(name)+(ageMY?" · "+ageMY:""),`<button class="top-btn" data-settings aria-label="Settings">⚙</button>`)}
   <div class="view">
     <div class="brief-grid">
       <div class="brief-item"><span>🍼</span><span>${feedBrief}</span></div>
