@@ -679,6 +679,7 @@ function vToday(){
   const salut=hr<12?"Good morning":hr<18?"Good afternoon":"Good evening";
   const age=ageFromDob(state.child.dob);
   const dk=todayKey(); const log=state.logs[dk]||{};
+  const edk=effectiveDateKey();
   const planIds=planFor(dk);
   const plan=planIds.map(id=>live(state.therapies).find(t=>t.id===id)).filter(Boolean);
   const doneCount=plan.filter(t=>log[t.id]).length;
@@ -691,14 +692,14 @@ function vToday(){
   const streakMsg=onDays===0?"A fresh week to begin 🌱":onDays>=6?`You showed up ${onDays} of 7 days 🌿`:`${onDays} of the last 7 days — every bit counts`;
 
   const upcoming=live(state.appointments).filter(a=>a.when&&new Date(a.when)>=new Date(new Date().toDateString())).sort((a,b)=>new Date(a.when)-new Date(b.when));
-  const next=upcoming[0];
-  let apptCard;
+  let apptCard,apptSectionTitle;
   {
     const weekEnd=new Date(); weekEnd.setDate(weekEnd.getDate()+7); weekEnd.setHours(23,59,59,999);
     const weekAppts=upcoming.filter(a=>new Date(a.when)<=weekEnd);
-    const tk2=todayKey();
-    const todayAppts=weekAppts.filter(a=>(a.when||"").slice(0,10)===tk2);
-    const restAppts=weekAppts.filter(a=>(a.when||"").slice(0,10)!==tk2);
+    const isShift=edk!==dk;
+    apptSectionTitle=isShift?"Tomorrow's appointments":"Today's appointments";
+    const focusAppts=weekAppts.filter(a=>(a.when||"").slice(0,10)===edk);
+    const restAppts=weekAppts.filter(a=>(a.when||"").slice(0,10)!==edk);
     const apptRow=a=>{
       const d=new Date(a.when);
       const days=Math.round((new Date(d.toDateString())-new Date(new Date().toDateString()))/86400000);
@@ -708,18 +709,16 @@ function vToday(){
       <div class="row-body"><div class="row-title">${esc(a.title)}</div><div class="row-sub">${esc(a.provider||"")}${a.hasTime?" · "+d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""} · ${cd}</div></div>
       <span class="chev">›</span></div>`;
     };
-    if(weekAppts.length){
-      let inner="";
-      if(todayAppts.length){
-        inner+=`<div class="subhead" style="margin:0 0 6px">Today</div>${todayAppts.map(apptRow).join("")}`;
-      }
-      if(restAppts.length){
-        inner+=`<div class="subhead" style="margin:${todayAppts.length?"18px":"0"} 0 6px">This week</div>${restAppts.map(apptRow).join("")}`;
-      }
-      apptCard=`<div class="card">${inner}</div>`;
+    let inner="";
+    if(focusAppts.length){
+      inner+=focusAppts.map(apptRow).join("");
     } else {
-      apptCard=`<div class="card"><div class="mini-note">📅 No upcoming appointments this week — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div></div>`;
+      inner+=`<div class="mini-note" style="margin:0">📅 No appointments ${isShift?"tomorrow":"today"} — <span class="link-btn" data-go="care" data-tab="appts">add one</span></div>`;
     }
+    if(restAppts.length){
+      inner+=`<div class="subhead" style="margin:${focusAppts.length?"18px":"0"} 0 6px">This week</div>${restAppts.map(apptRow).join("")}`;
+    }
+    apptCard=`<div class="card">${inner}</div>`;
   }
 
   const LASER_SESSIONS=[{id:"laser1",label:"Session 1"},{id:"laser2",label:"Session 2"},{id:"laser3",label:"Session 3"},{id:"laser4",label:"Session 4"}];
@@ -740,29 +739,34 @@ function vToday(){
   const meBanner = !me ? `<div class="note" style="margin-top:16px"><b>Who's using this device?</b> Set your name in ⚙ so shared notes show who wrote them. <span class="small-link" data-settings>Set name</span></div>`:"";
 
   const todayFull=DOWFULL[new Date().getDay()]+", "+MON[new Date().getMonth()]+" "+new Date().getDate();
-  const ageMY=!age?"":age.months<1?"under 1 month old":age.months<24?age.months+(age.months===1?" month":" months")+" old":(function(){var y=Math.floor(age.months/12),m=age.months%12;return y+(y>1?" years":" year")+(m?" "+m+"m":"")+" old"})();
-  const nextBrief=next?esc(next.title)+(next.hasTime?" · "+new Date(next.when).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}):""):"Nothing scheduled";
+  const ageWeeks=age?Math.floor(age.days/7):0;
+  const ageMY=!age?"":age.months<1?`under 1 month old (${ageWeeks} week${ageWeeks===1?"":"s"})`:age.months<24?age.months+(age.months===1?" month":" months")+` (${ageWeeks} week${ageWeeks===1?"":"s"}) old`:(function(){var y=Math.floor(age.months/12),m=age.months%12;return y+(y>1?" years":" year")+(m?" "+m+"m":"")+" old"})();
   const feed2=state.feeding||{};
-  const feedBrief=feed2.amount?feed2.amount+" "+(feed2.unit||"mL"):"Not set";
-  const edk=effectiveDateKey();
+  const feedBrief=feed2.amount?`<b>Feed Amount:</b> ${feed2.amount} ${esc(feed2.unit||"mL")}`:`<b>Feed Amount:</b> Not set`;
   const mealDay=((state.meals&&state.meals.days)||[]).find(d=>d.date===edk);
   const visitors=mealDay?mealDay.items.filter(it=>it.type!=="meal"):[];
-  const visitBrief=visitors.length?visitors.map(it=>esc(it.person||"Volunteer needed")+" ("+(it.type==="childcare"?"Jadon's playmate":"helper")+")").join(", "):"No one scheduled";
+  const playmateItem=visitors.find(it=>it.type==="childcare");
+  const helperItem=visitors.find(it=>it.type==="help");
+  const playmateBrief=`<b>Jadon's Playmate:</b> ${playmateItem?esc(playmateItem.person||"Volunteer needed"):"No one scheduled"}`;
+  const helperBrief=`<b>Helper:</b> ${helperItem?esc(helperItem.person||"Volunteer needed"):"No one scheduled"}`;
   const dinnerItem=mealDay?mealDay.items.find(it=>it.type==="meal"):null;
-  const dinnerBrief=dinnerItem?esc(dinnerItem.person||"Volunteer needed")+(dinnerItem.detail?" — "+esc(dinnerItem.detail):""):"Not yet scheduled";
-  return `${header(todayFull,esc(name)+(ageMY?" · "+ageMY:""),`<button class="top-btn" data-settings aria-label="Settings">⚙</button>`)}
+  const dinnerBrief=dinnerItem?`<b>Dinner:</b> ${esc(dinnerItem.person||"Volunteer needed")}${dinnerItem.detail?" — "+esc(dinnerItem.detail):""}`:`<b>Dinner:</b> Not yet scheduled`;
+  return `<div class="view" style="padding-top:env(safe-area-inset-top)">
+    <div class="sec" style="margin-top:14px"><h2>${apptSectionTitle}</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
+    ${apptCard}
+    ${feedingCard()}
+  </div>
+  ${header(todayFull,esc(name)+(ageMY?" · "+ageMY:""),`<button class="top-btn" data-settings aria-label="Settings">⚙</button>`)}
   <div class="view">
     <div class="brief-grid">
-      <div class="brief-item"><span>📅</span><span>${nextBrief}</span></div>
       <div class="brief-item"><span>🍼</span><span>${feedBrief}</span></div>
-      <div class="brief-item"><span>🧑‍🤝‍🧑</span><span>${visitBrief}</span></div>
+      <div class="brief-item"><span>🧑‍🤝‍🧑</span><span>${playmateBrief}</span></div>
+      <div class="brief-item"><span>🤝</span><span>${helperBrief}</span></div>
       <div class="brief-item"><span>🍽️</span><span>${dinnerBrief}</span></div>
       <div class="brief-item"><span class="sync-dot ${Sync.status==="on"?"on":Sync.status==="err"?"err":""}"></span><span>${Sync.status==="on"?"Synced":Sync.status==="err"?"Sync error":"Local only"}</span></div>
     </div>
     ${meBanner}
     ${!state.settings.disclaimerSeen?`<div class="note" style="margin-top:16px"><b>A gentle note.</b> These activities support — they don't replace — Roy's care team. Check new exercises with his therapists, and celebrate progress on his own timeline. <span class="small-link" id="dismissNote">Got it</span></div>`:""}
-
-    <div class="card streak" style="margin-top:16px"><div class="streak-top"><div class="streak-msg">${streakMsg}</div></div><div class="streak-days">${strip}</div></div>
 
     <div class="sec"><h2>Today's 3</h2><span class="link-btn" data-plan>Change</span></div>
     <div class="card"><div class="bar"><i style="width:${pct}%"></i></div>
@@ -772,11 +776,8 @@ function vToday(){
     <div class="card"><div class="bar"><i style="width:${laserPct}%"></i></div>
       <div style="margin-top:14px">${laserList}</div></div>
 
-    ${feedingCard()}
     ${suppliesCard()}
     ${jadonTodayCard()}
-    <div class="sec"><h2>Next visits</h2><span class="link-btn" data-go="care" data-tab="appts">All appointments</span></div>
-    ${apptCard}
 
     ${horizonCard()}
 
