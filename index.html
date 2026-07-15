@@ -480,7 +480,7 @@ if(!state._extrasV10){
     });
   });
   state._extrasV12=1; saveLocal();
-}(function(){
+}function dedupeAll(){
   var GENERIC_T=["Tummy time","Reaching across midline","Gentle range-of-motion","Supported sitting practice","Hands to midline play","Grasp & release toys","Sensory exploration","Face-to-face talking","Serve & return turns","Read aloud","Oral-motor & feeding play","Visual tracking","Calming routine"];
   function keeperOf(g){var k=g[0];g.forEach(function(x){if((x.updatedAt||0)>(k.updatedAt||0))k=x;});return k;}
   var tGroups={};
@@ -529,8 +529,9 @@ if(!state._extrasV10){
     else { keeper=keeperOf(g); keeper.deleted=false; keeper.updatedAt=now(); }
     g.forEach(function(h){ if(h!==keeper && !h.deleted){ h.deleted=true; h.updatedAt=now(); } });
   });
-  saveLocal();
-})();
+  commit();
+}
+dedupeAll();
 
 
 
@@ -624,7 +625,7 @@ async function syncPull(silent){
 function applyRemote(doc){
   Sync.applying=true;
   const merged=mergeState(state,doc);
-  state=merged; saveLocal(); render();
+  state=merged; dedupeAll(); render();
   Sync.applying=false;
 }
 function scheduleSync(){ if(!syncReady()){return} clearTimeout(Sync.timer); Sync.timer=setTimeout(syncPush,700); }
