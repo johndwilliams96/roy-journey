@@ -529,7 +529,7 @@ if(!state._extrasV10){
     else { keeper=keeperOf(g); keeper.deleted=false; keeper.updatedAt=now(); }
     g.forEach(function(h){ if(h!==keeper && !h.deleted){ h.deleted=true; h.updatedAt=now(); } });
   });
-  commit();
+  saveLocal();
 }
 dedupeAll();
 
@@ -627,6 +627,7 @@ function applyRemote(doc){
   const merged=mergeState(state,doc);
   state=merged; dedupeAll(); render();
   Sync.applying=false;
+  scheduleSync();
 }
 function scheduleSync(){ if(!syncReady()){return} clearTimeout(Sync.timer); Sync.timer=setTimeout(syncPush,700); }
 async function syncPush(silent){
