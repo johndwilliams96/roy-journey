@@ -1,0 +1,277 @@
+{
+  "organizer": "Havilah Williams",
+  "family": "2 Adults, 1 Kid",
+  "location": "Olympia, WA",
+  "favorite": "Protein and vegetable focused meals",
+  "leastFavorite": "Carb-heavy meals",
+  "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
+  "link": "https://www.mealtrain.com/trains/8l6y1n",
+  "lastUpdated": "2026-07-27T00:00:00.000Z",
+  "days": [
+    {
+      "date": "2026-07-27",
+      "items": [
+        {
+          "type": "childcare",
+          "person": "Rachella Williams"
+        },
+        {
+          "type": "help",
+          "person": "Karen Ketron"
+        },
+        {
+          "type": "meal",
+          "person": "AnnMarie O'Connor",
+          "detail": "Miso salmon or steak with salad"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-28",
+      "items": [
+        {
+          "type": "childcare",
+          "person": "Juanita Williams"
+        },
+        {
+          "type": "help",
+          "person": "Dorothy Hill"
+        },
+        {
+          "type": "meal",
+          "person": "Pam Kirk",
+          "detail": "Chicken enchiladas"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-29",
+      "items": [
+        {
+          "type": "childcare",
+          "person": "Susan Williams"
+        },
+        {
+          "type": "help",
+          "person": "Susan Williams"
+        },
+        {
+          "type": "meal",
+          "person": "Emily Martucci",
+          "detail": "Something delicious"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-30",
+      "items": [
+        {
+          "type": "childcare",
+          "person": "Victoria Salinger"
+        },
+        {
+          "type": "help",
+          "person": "Eva & Elise Martinez"
+        },
+        {
+          "type": "meal",
+          "person": "Joan Scamman",
+          "detail": "Kerry and Joan"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-31",
+      "items": [
+        {
+          "type": "childcare",
+          "person": "Susie Martucci"
+        },
+        {
+          "type": "help",
+          "person": "Karen Ketron"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-03",
+      "items": [
+        {
+          "type": "help",
+          "person": "Karen Ketron"
+        },
+        {
+          "type": "meal",
+          "person": "Christine Feliciano",
+          "detail": "Steak salad"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-04",
+      "items": [
+        {
+          "type": "help",
+          "person": "Michelle Snyder"
+        },
+        {
+          "type": "meal",
+          "person": "Michelle Snyder",
+          "detail": "Chicken, rice and vegetables"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-05",
+      "items": [
+        {
+          "type": "help",
+          "person": "Susan Williams"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-06",
+      "items": [
+        {
+          "type": "help",
+          "person": "Eva & Elise Martinez"
+        },
+        {
+          "type": "meal",
+          "person": "Victoria Salinger",
+          "detail": "TBD- something garden fresh with protein"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-07",
+      "items": [
+        {
+          "type": "help",
+          "person": "Karen Ketron"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-10",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Leanne Livingston",
+          "detail": "Chicken and good sides"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-11",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Olivia Hier",
+          "detail": "Mexican spread"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-12",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Susan Williams",
+          "detail": "Something good"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-13",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Naomi Berg",
+          "detail": "Steak and good side"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-17",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Rachella Williams",
+          "detail": "Dinner"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-18",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Kathleen Michaelis",
+          "detail": "Baked salmon /salad /rice"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-19",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Rachel And Kathy Stephenson",
+          "detail": "A Kathy and Rachel dinner"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-20",
+      "items": [
+        {
+          "type": "meal",
+          "person": "",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "date": "2026-08-24",
+      "items": [
+        {
+          "type": "meal",
+          "person": "Emily Martucci",
+          "detail": "Something Delicious"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "items": [
+        {
+          "type": "meal",
+          "person": "",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "date": "2026-08-26",
+      "items": [
+        {
+          "type": "meal",
+          "person": "",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "date": "2026-08-27",
+      "items": [
+        {
+          "type": "meal",
+          "person": "",
+          "detail": ""
+        }
+      ]
+    }
+  ]
+}
