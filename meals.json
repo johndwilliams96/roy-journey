@@ -6,26 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-07-28T02:05:33.778Z",
+  "lastUpdated": "2026-07-28T18:03:56.732Z",
   "days": [
-    {
-      "date": "2026-07-27",
-      "items": [
-        {
-          "type": "childcare",
-          "person": "Rachella Williams"
-        },
-        {
-          "type": "help",
-          "person": "Karen Ketron"
-        },
-        {
-          "type": "meal",
-          "person": "AnnMarie O'Connor",
-          "detail": "Miso salmon or steak with salad"
-        }
-      ]
-    },
     {
       "date": "2026-07-28",
       "items": [
