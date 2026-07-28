@@ -1799,7 +1799,7 @@ async function mealsSync(){
 function mealsBoot(){
   mealsSync();
   clearInterval(mealsBoot._iv);
-  mealsBoot._iv=setInterval(mealsSync,30*60*1000);
+  mealsBoot._iv=setInterval(mealsSync,24*60*60*1000);
 }
 
 
