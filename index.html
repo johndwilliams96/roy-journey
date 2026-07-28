@@ -1781,12 +1781,34 @@ function icsMerge(evs){
   state.jadonSchedule.forEach(x=>{if(x.fromCalendar&&x.calId&&x.calId.indexOf("ics:")===0&&!seen[x.calId]&&!x.deleted&&(x.when||"")>=wk){x.deleted=true;x.updatedAt=now()}});
 }
 async function icsBoot(){ if(!icsCfg().url)return; try{await icsSync(false)}catch(e){} clearInterval(icsBoot._iv);icsBoot._iv=setInterval(()=>{icsSync(false).catch(()=>{})},30*60*1000); }
+async function mealsSync(){
+  try{
+    const res = await fetch('./meals.json', {cache:'no-store'});
+    if(!res.ok) return;
+    const json = await res.json();
+    if(!json || !Array.isArray(json.days)) return;
+    const before = JSON.stringify((state.meals||{}).days||[]);
+    const after = JSON.stringify(json.days);
+    if(before===after) return;
+    state.meals = Object.assign({}, state.meals||{}, json);
+    saveLocal();
+    render();
+    if(typeof scheduleSync==='function') scheduleSync();
+  }catch(e){ /* offline or fetch failed - keep last known-good meals data */ }
+}
+function mealsBoot(){
+  mealsSync();
+  clearInterval(mealsBoot._iv);
+  mealsBoot._iv=setInterval(mealsSync,30*60*1000);
+}
+
 
 /* ============================ Boot ============================ */
 render();
 syncInit();
 gcalBoot();
 icsBoot();
+mealsBoot();
 </script>
 </body>
 </html>
