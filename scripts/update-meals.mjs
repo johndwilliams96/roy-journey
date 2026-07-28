@@ -61,8 +61,8 @@ async function main() {
       const day = parseInt(mm[2], 10);
       if (!month) return;
       const dateObj = new Date(currentYear, month - 1, day);
-      if (iso < todayISO) return;
       const iso = dateObj.getFullYear() + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      if (iso < todayISO) return;
       const labelSpan = n.querySelector('.calendar-list__plus-item span');
       const label = norm(labelSpan ? labelSpan.textContent : '');
       let type = null;
