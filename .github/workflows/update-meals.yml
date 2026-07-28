@@ -1,0 +1,46 @@
+name: Update Meal Train Data
+
+on:
+  schedule:
+    - cron: '0 13 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-meals
+  cancel-in-progress: false
+
+jobs:
+  update-meals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+
+      - name: Run scraper
+        run: node scripts/update-meals.mjs
+
+      - name: Commit changes if updated
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add meals.json
+          if git diff --cached --quiet; then
+            echo "No changes to meals.json - MealTrain data unchanged."
+          else
+            git commit -m "Auto-update meal train data"
+            git push
+          fi
