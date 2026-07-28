@@ -38,13 +38,13 @@ async function main() {
     await dismissModals();
   }
 
-  const days = await page.evaluate(() => {
+  const todayISO = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const days = await page.evaluate((todayISO) => {
     function norm(s) { return (s || '').replace(/\s+/g, ' ').trim().replace(/[\u2018\u2019]/g, "'"); }
     const MONTHS = { Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12 };
     const nodes = document.querySelectorAll('.calendar-list__divider, .calendar-list-row');
     let currentYear = null;
-    const today = new Date(); today.setHours(0,0,0,0);
-    const byDate = {};
+        const byDate = {};
     nodes.forEach(n => {
       if (n.classList.contains('calendar-list__divider')) {
         const m = n.textContent.trim().match(/(\d{4})/);
@@ -61,7 +61,7 @@ async function main() {
       const day = parseInt(mm[2], 10);
       if (!month) return;
       const dateObj = new Date(currentYear, month - 1, day);
-      if (dateObj < today) return;
+      if (iso < todayISO) return;
       const iso = dateObj.getFullYear() + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
       const labelSpan = n.querySelector('.calendar-list__plus-item span');
       const label = norm(labelSpan ? labelSpan.textContent : '');
@@ -80,7 +80,7 @@ async function main() {
       byDate[iso].push(item);
     });
     return Object.keys(byDate).sort().map(date => ({ date, items: byDate[date] }));
-  });
+  }, todayISO);
 
   await browser.close();
 
