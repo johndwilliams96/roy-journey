@@ -14,8 +14,9 @@ function norm(s) {
 async function main() {
   const browser = await chromium.launch();
   const page = await browser.newPage();
-  await page.goto(TRAIN_URL, { waitUntil: 'networkidle', timeout: 60000 });
-  await page.waitForSelector('.calendar-list-row', { timeout: 30000 });
+  await page.goto(TRAIN_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.waitForSelector('.calendar-list-row', { timeout: 45000 });
+  await page.waitForTimeout(1500);
 
   // Reveal further future dates (each click adds ~20 more days)
   for (let i = 0; i < 5; i++) {
