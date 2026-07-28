@@ -18,13 +18,24 @@ async function main() {
   await page.waitForSelector('.calendar-list-row', { timeout: 45000 });
   await page.waitForTimeout(1500);
 
+  async function dismissModals() {
+    await page.evaluate(() => {
+      document.querySelectorAll('.modal.show, .modal-backdrop').forEach(el => el.remove());
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    });
+  }
+  await dismissModals();
+
   // Reveal further future dates (each click adds ~20 more days)
   for (let i = 0; i < 5; i++) {
     const more = page.getByText(/show \d+ more dates/i);
     const count = await more.count();
     if (count === 0) break;
-    await more.first().click();
+    await dismissModals();
+    await more.first().click({ force: true, timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(1500);
+    await dismissModals();
   }
 
   const days = await page.evaluate(() => {
