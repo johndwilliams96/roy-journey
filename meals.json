@@ -6,26 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-07-28T18:03:56.732Z",
+  "lastUpdated": "2026-07-29T17:51:15.178Z",
   "days": [
-    {
-      "date": "2026-07-28",
-      "items": [
-        {
-          "type": "childcare",
-          "person": "Juanita Williams"
-        },
-        {
-          "type": "help",
-          "person": "Dorothy Hill"
-        },
-        {
-          "type": "meal",
-          "person": "Pam Kirk",
-          "detail": "Chicken enchiladas"
-        }
-      ]
-    },
     {
       "date": "2026-07-29",
       "items": [
