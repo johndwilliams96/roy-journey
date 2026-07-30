@@ -6,26 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-07-29T17:51:15.178Z",
+  "lastUpdated": "2026-07-30T18:02:50.687Z",
   "days": [
-    {
-      "date": "2026-07-29",
-      "items": [
-        {
-          "type": "childcare",
-          "person": "Susan Williams"
-        },
-        {
-          "type": "help",
-          "person": "Susan Williams"
-        },
-        {
-          "type": "meal",
-          "person": "Emily Martucci",
-          "detail": "Something delicious"
-        }
-      ]
-    },
     {
       "date": "2026-07-30",
       "items": [
@@ -192,7 +174,8 @@
       "items": [
         {
           "type": "meal",
-          "person": ""
+          "person": "Pam Kirk",
+          "detail": "Thai chicken meal"
         }
       ]
     },
