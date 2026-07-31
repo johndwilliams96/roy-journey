@@ -6,26 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-07-30T18:02:50.687Z",
+  "lastUpdated": "2026-07-31T18:12:12.828Z",
   "days": [
-    {
-      "date": "2026-07-30",
-      "items": [
-        {
-          "type": "childcare",
-          "person": "Victoria Salinger"
-        },
-        {
-          "type": "help",
-          "person": "Eva & Elise Martinez"
-        },
-        {
-          "type": "meal",
-          "person": "Joan Scamman",
-          "detail": "Kerry and Joan"
-        }
-      ]
-    },
     {
       "date": "2026-07-31",
       "items": [
