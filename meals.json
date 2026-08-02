@@ -6,7 +6,7 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-08-01T16:32:37.057Z",
+  "lastUpdated": "2026-08-02T16:30:06.735Z",
   "days": [
     {
       "date": "2026-08-03",
@@ -27,7 +27,7 @@
       "items": [
         {
           "type": "help",
-          "person": "Michelle Snyder"
+          "person": "Dorothy Hill"
         },
         {
           "type": "meal",
@@ -41,7 +41,7 @@
       "items": [
         {
           "type": "help",
-          "person": "Susan Williams"
+          "person": "Michelle Snyder"
         }
       ]
     },
