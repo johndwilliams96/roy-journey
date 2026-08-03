@@ -6,7 +6,7 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-08-02T16:30:06.735Z",
+  "lastUpdated": "2026-08-03T19:02:15.487Z",
   "days": [
     {
       "date": "2026-08-03",
@@ -55,7 +55,7 @@
         {
           "type": "meal",
           "person": "Victoria Salinger",
-          "detail": "TBD- something garden fresh with protein"
+          "detail": "Poached Cod with fresh vegetable, and sourdough"
         }
       ]
     },
@@ -72,6 +72,10 @@
       "date": "2026-08-10",
       "items": [
         {
+          "type": "help",
+          "person": "Karen Ketron"
+        },
+        {
           "type": "meal",
           "person": "Leanne Livingston",
           "detail": "Chicken and good sides"
@@ -81,6 +85,10 @@
     {
       "date": "2026-08-11",
       "items": [
+        {
+          "type": "help",
+          "person": "Dorothy Hill"
+        },
         {
           "type": "meal",
           "person": "Olivia Hier",
@@ -92,6 +100,10 @@
       "date": "2026-08-12",
       "items": [
         {
+          "type": "help",
+          "person": "Michelle Snyder"
+        },
+        {
           "type": "meal",
           "person": "Susan Williams",
           "detail": "Something good"
@@ -102,9 +114,22 @@
       "date": "2026-08-13",
       "items": [
         {
+          "type": "help",
+          "person": "Eva & Elise Martinez"
+        },
+        {
           "type": "meal",
           "person": "Naomi Berg",
           "detail": "Steak and good side"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-14",
+      "items": [
+        {
+          "type": "help",
+          "person": ""
         }
       ]
     },
