@@ -6,22 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-08-03T19:02:15.487Z",
+  "lastUpdated": "2026-08-04T19:10:10.256Z",
   "days": [
-    {
-      "date": "2026-08-03",
-      "items": [
-        {
-          "type": "help",
-          "person": "Karen Ketron"
-        },
-        {
-          "type": "meal",
-          "person": "Christine Feliciano",
-          "detail": "Steak salad"
-        }
-      ]
-    },
     {
       "date": "2026-08-04",
       "items": [
@@ -188,7 +174,8 @@
       "items": [
         {
           "type": "meal",
-          "person": ""
+          "person": "Christine Feliciano",
+          "detail": "Something good"
         }
       ]
     },
@@ -197,7 +184,8 @@
       "items": [
         {
           "type": "meal",
-          "person": ""
+          "person": "Michelle Snyder",
+          "detail": "Whole Chicken with good sides"
         }
       ]
     },
