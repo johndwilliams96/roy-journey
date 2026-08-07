@@ -6,22 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-08-06T15:13:01.144Z",
+  "lastUpdated": "2026-08-07T14:12:48.786Z",
   "days": [
-    {
-      "date": "2026-08-06",
-      "items": [
-        {
-          "type": "help",
-          "person": "Eva & Elise Martinez"
-        },
-        {
-          "type": "meal",
-          "person": "Victoria Salinger",
-          "detail": "Poached Cod with fresh vegetable, and sourdough"
-        }
-      ]
-    },
     {
       "date": "2026-08-07",
       "items": [
