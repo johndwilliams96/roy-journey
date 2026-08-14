@@ -6,22 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-08-13T14:22:02.105Z",
+  "lastUpdated": "2026-08-14T14:15:18.139Z",
   "days": [
-    {
-      "date": "2026-08-13",
-      "items": [
-        {
-          "type": "help",
-          "person": "Eva & Elise Martinez"
-        },
-        {
-          "type": "meal",
-          "person": "Naomi Berg",
-          "detail": "Steak and good side"
-        }
-      ]
-    },
     {
       "date": "2026-08-14",
       "items": [
