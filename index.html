@@ -567,6 +567,9 @@ if(!state._extrasV10){
       state[k] = state[k].filter(function(x){
         return !(x && x.deleted===true && (x.updatedAt||0) < purgeCutoff);
       });
+      // Strip heavy fields from deleted items immediately - a deleted item's photo
+      // is never rendered again, no need to keep carrying it until the grace period ends.
+      state[k].forEach(function(x){ if(x && x.deleted===true && x.img){ delete x.img; } });
     }
   });
   saveLocal();
@@ -641,6 +644,7 @@ function mergeState(l,r){
       out[k] = out[k].filter(function(x){
         return !(x && x.deleted===true && (x.updatedAt||0) < _purgeCutoff);
       });
+      out[k].forEach(function(x){ if(x && x.deleted===true && x.img){ delete x.img; } });
     }
   });
   return out;
