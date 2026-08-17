@@ -558,6 +558,17 @@ if(!state._extrasV10){
     else { keeper=keeperOf(g); keeper.deleted=false; keeper.updatedAt=now(); }
     g.forEach(function(h){ if(h!==keeper && !h.deleted){ h.deleted=true; h.updatedAt=now(); } });
   });
+  // Physically purge old soft-deleted tombstones to reclaim localStorage space
+  // (safe after 3 days - long enough for all devices to have seen the deletion via sync)
+  var PURGE_AFTER_MS = 3*24*60*60*1000;
+  var purgeCutoff = now() - PURGE_AFTER_MS;
+  ["appointments","therapies","horizon","milestones","actionItems","careTeam","journal","generalQuestions","jadonSchedule"].forEach(function(k){
+    if(Array.isArray(state[k])){
+      state[k] = state[k].filter(function(x){
+        return !(x && x.deleted===true && (x.updatedAt||0) < purgeCutoff);
+      });
+    }
+  });
   saveLocal();
 }
 dedupeAll();
@@ -1587,7 +1598,7 @@ function feedingCard(){
       <div class="appt-info"><div class="t">Roy's current feed</div><div class="s">${due?`Step-up due — increase to ${next} ${u}`:`Next +${f.step} ${u} on ${DOWFULL[feedDay()]}`}</div></div></div>
       ${due?`<button class="btn sm" data-feed-bump style="width:100%;margin-top:12px">⬆︎ Increase to ${next} ${u}</button>`:""}</div>`;
 }
-function feedBump(){const f=state.feeding;if(!f)return;const u=f.unit||"mL";f.amount=(f.amount||0)+(f.step||5);f.lastBumped=todayKey();f.history=f.history||[];f.history.unshift({date:todayKey(),amount:f.amount});f.updatedAt=now();commit();render();toast("Feed increased to "+f.amount+" "+u)}
+function feedBump(){const f=state.feeding;if(!f)return;const u=f.unit||"mL";f.amount=(f.amount||0)+(f.step||5);f.lastBumped=todayKey();f.history=f.history||[];f.history.unshift({date:todayKey(),amount:f.amount});if(f.history.length>30)f.history.length=30;f.updatedAt=now();commit();render();toast("Feed increased to "+f.amount+" "+u)}
 function openFeed(){const f=state.feeding;const u=f.unit||"mL";
   openSheet(`<h3>Feeding plan</h3><div class="sheet-sub">Roy's tube feed amount, stepping up automatically each week.</div>
     <div class="field"><label>Unit</label><div class="chips" id="f_unit"><button class="chip-opt ${u==="mL"?"on":""}" data-u="mL">mL</button><button class="chip-opt ${u==="oz"?"on":""}" data-u="oz">oz</button></div></div>
