@@ -630,6 +630,19 @@ function mergeState(l,r){
   out.jadonSchedule=mergeById(l.jadonSchedule,r.jadonSchedule);
   out.horizon=mergeById(l.horizon,r.horizon);
   out.checklists=mergeById(l.checklists,r.checklists);
+  // Purge old soft-deleted tombstones on every merge (not just dedupeAll) so that
+  // syncPush's own read-before-write merge can't silently re-inflate the document with
+  // stale deleted items pulled from remote - that bloat was causing Supabase upserts to
+  // exceed the statement timeout, which blocked sync entirely (e.g. feed amount not
+  // propagating across devices).
+  var _purgeCutoff = now() - 3*24*60*60*1000;
+  ["appointments","therapies","horizon","milestones","actionItems","careTeam","journal","generalQuestions","jadonSchedule"].forEach(function(k){
+    if(Array.isArray(out[k])){
+      out[k] = out[k].filter(function(x){
+        return !(x && x.deleted===true && (x.updatedAt||0) < _purgeCutoff);
+      });
+    }
+  });
   return out;
 }
 
