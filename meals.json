@@ -6,18 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-08-20T13:44:42.058Z",
+  "lastUpdated": "2026-08-21T13:43:35.600Z",
   "days": [
-    {
-      "date": "2026-08-20",
-      "items": [
-        {
-          "type": "meal",
-          "person": "Pam Kirk",
-          "detail": "Thai chicken meal"
-        }
-      ]
-    },
     {
       "date": "2026-08-24",
       "items": [
