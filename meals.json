@@ -6,18 +6,8 @@
   "leastFavorite": "Carb-heavy meals",
   "instructions": "We eat very small portions. Thank you so much for your help. Bless you!",
   "link": "https://www.mealtrain.com/trains/8l6y1n",
-  "lastUpdated": "2026-08-24T13:50:51.156Z",
+  "lastUpdated": "2026-08-25T13:49:36.503Z",
   "days": [
-    {
-      "date": "2026-08-24",
-      "items": [
-        {
-          "type": "meal",
-          "person": "Emily Martucci",
-          "detail": "Something Delicious"
-        }
-      ]
-    },
     {
       "date": "2026-08-25",
       "items": [
