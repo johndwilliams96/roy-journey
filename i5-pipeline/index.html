@@ -8,12 +8,15 @@
 <style>
 html, body { margin: 0; padding: 0; background: #0B1324 !important; color: #FFFFFF; overflow: hidden; color-scheme: dark; }
 canvas { display: block; background: #0B1324; }
+#fsbtn { position: fixed; right: 12px; bottom: 6px; z-index: 5; margin: 0; padding: 4px 14px; border: 1px solid #7D8BA3; border-radius: 6px; background: #142038; color: #F4F7FC; font-family: Arial, Helvetica, sans-serif; font-weight: bold; font-size: 16px; line-height: 1.2; cursor: pointer; opacity: 0.85; }
+#fsbtn:focus { outline: 2px solid #3D7EFF; }
 #msg { display: none; padding: 40px; font: bold 32px Arial, Helvetica, sans-serif; color: #FFFFFF; background: #0B1324; }
 </style>
 </head>
 <body style="background:#0B1324">
 <canvas id="c" role="img" aria-label="I-5 Proposal Pipeline timeline"></canvas>
 <div id="msg"></div>
+<button id="fsbtn" type="button" aria-label="Full screen">Full screen</button>
 <noscript><div style="padding:40px;font:bold 32px Arial,Helvetica,sans-serif;color:#fff">I-5 Proposal Pipeline needs JavaScript.</div></noscript>
 <script>
 // ===== DATA (generated from the Page source by build_tv.py; edit there or here) =====
@@ -474,7 +477,13 @@ function readBox(el) {
   function render() {
     var vw = Math.max(200, Math.floor(document.documentElement.clientWidth || window.innerWidth || 1280));
     var vh = Math.max(120, Math.floor(window.innerHeight || 720));
-    var L = layout(vw, vh);
+    // TV-only breathing room: VPAD of the viewport height above and below the chart. The chart is fitted
+    // into the remaining height (uniform scale, never clipped) and shifted down by the top pad.
+    var VPAD = 0.045;
+    var pad = Math.round(vh * VPAD);
+    var L = layout(vw, Math.max(120, vh - 2 * pad));
+    L.oy += pad; L.fy += pad;
+    L.canvasH = Math.max(vh, L.canvasH + 2 * pad);
     var today = startOfDay(new Date());
     var dpr = Math.min(3, window.devicePixelRatio || 1);
     var ctx = null;
@@ -504,6 +513,58 @@ function readBox(el) {
       window.__i5 = { ok: false, error: String(err), boxes: [] };
     }
   }
+
+  // ---- Full screen (TV-only): standard API plus webkit, moz and ms fallbacks ----
+  var btn = document.getElementById("fsbtn");
+  function fsElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || document.webkitCurrentFullScreenElement ||
+      document.mozFullScreenElement || document.msFullscreenElement || null;
+  }
+  function enterFs() {
+    var el = document.documentElement;
+    try {
+      if (el.requestFullscreen) { var p = el.requestFullscreen(); if (p && p["catch"]) p["catch"](function () {}); }
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if (el.webkitRequestFullScreen) el.webkitRequestFullScreen();
+      else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+      else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    } catch (_e) { /* browser refused */ }
+  }
+  function exitFs() {
+    try {
+      if (document.exitFullscreen) { var p = document.exitFullscreen(); if (p && p["catch"]) p["catch"](function () {}); }
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
+      else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+    } catch (_e) { /* ignore */ }
+  }
+  function toggleFs() { if (fsElement()) exitFs(); else enterFs(); }
+  // Button sits in the bottom padding (right corner), sized to the viewport so it reads on a TV; hidden in full screen.
+  function placeButton() {
+    if (!btn) return;
+    try {
+      var vh = Math.max(120, Math.floor(window.innerHeight || 720));
+      var padPx = Math.round(vh * 0.045);
+      var fsz = Math.max(12, Math.min(28, Math.round(padPx * 0.42)));
+      btn.style.fontSize = fsz + "px";
+      btn.style.padding = Math.round(fsz * 0.2) + "px " + Math.round(fsz * 0.7) + "px";
+      btn.style.bottom = Math.max(2, Math.round((padPx - fsz * 1.65) / 2)) + "px";
+      btn.style.right = Math.max(6, Math.round(vh * 0.012)) + "px";
+      btn.style.display = fsElement() ? "none" : "block";
+    } catch (_e) { /* ignore */ }
+  }
+  function onFsChange() { placeButton(); soon(); window.setTimeout(render, 300); }
+  try {
+    if (btn) btn.addEventListener("click", function (e) { if (e && e.stopPropagation) e.stopPropagation(); toggleFs(); });
+    cv.addEventListener("click", function () { toggleFs(); });
+    document.addEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
+    document.addEventListener("mozfullscreenchange", onFsChange);
+    document.addEventListener("MSFullscreenChange", onFsChange);
+    window.addEventListener("resize", placeButton);
+    placeButton();
+  } catch (_e) { /* full screen is optional */ }
 
   var pending = 0;
   function soon() { if (pending) window.clearTimeout(pending); pending = window.setTimeout(function () { pending = 0; render(); }, 150); }
