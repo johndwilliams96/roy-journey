@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en" style="background:#0B1324">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>I-5 Proposal Pipeline</title>
+<style>
+html, body { margin: 0; padding: 0; background: #0B1324 !important; color: #FFFFFF; overflow: hidden; color-scheme: dark; }
+canvas { display: block; background: #0B1324; }
+#msg { display: none; padding: 40px; font: bold 32px Arial, Helvetica, sans-serif; color: #FFFFFF; background: #0B1324; }
+</style>
+</head>
+<body style="background:#0B1324">
+<canvas id="c" role="img" aria-label="I-5 Proposal Pipeline timeline"></canvas>
+<div id="msg"></div>
+<noscript><div style="padding:40px;font:bold 32px Arial,Helvetica,sans-serif;color:#fff">I-5 Proposal Pipeline needs JavaScript.</div></noscript>
+<script>
+// ===== DATA (generated from the Page source by build_tv.py; edit there or here) =====
+var REVIEW_TODAY = [];
+var ITEMS = [
+  // Onsite Sept 2027 to Project Completion July 2028 per the Spirit Mountain Phase 2 booklet roadmap (10/20/2026).
+  { id: "P1", project: "Spirit Mountain Phase 2", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-09-01", end: "2028-07-01", monthOnly: true }] },
+  { id: "P3", project: "Table Mountain Inside Scoop", sent: "2026-10-12", mobs: [{ label: "Onsite", start: "2027-11-01", monthOnly: true }] },
+  // John 11/3/26: 5 months onsite (4 assumed + 1)
+  { id: "P4", project: "Muckleshoot High Limit", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-10-01", months: 5, monthOnly: true }] },
+  // Escalation starts at expected execution 10/15/26 per John (actual send 2026-08-28). Onsite dates per Attachment D schedule (8/27/26).
+  { id: "P5", project: "River Spirit", sent: "2026-10-15", startLabel: "Exec start", mobs: [
+    { label: "2nd Flr", start: "2027-04-17", end: "2027-06-26", monthOnly: false, executed: true },
+    { label: "1st Flr", start: "2027-07-17", end: "2028-12-25", monthOnly: false }
+  ] },
+  { id: "P6", project: "Natsukashii Decor Package", sent: "2026-09-25", mobs: [{ label: "Onsite", start: "2028-02-01", monthOnly: true }] },
+  // Base, Mid and Cadillac merged into one row per John: all sent 11/2/26, mobilization Nov 2027, assumed 4 months onsite.
+  { id: "P8-10", project: "Kickapoo 3 Options", sent: "2026-11-02", mobs: [{ label: "Onsite", start: "2027-11-01", monthOnly: true }] },
+  { id: "P2", project: "Cahuilla", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-11-01", monthOnly: true }] }
+];
+
+// ===== DRAWING CODE (same as the Page) =====
+try {
+var TICK_MS = 60 * 1e3;
+var NAVY = "#0B1324";
+try {
+  document.documentElement.style.setProperty("background", NAVY, "important");
+  if (document.body) document.body.style.setProperty("background", NAVY, "important");
+} catch (_e) {
+}
+var VALIDITY_DAYS = 15;
+var MONTH_DAYS = 30;
+var MOB_DAYS_PER_DAY = 2;
+var MONTHLY_RATE = 5e-3;
+var ASSUMED_ONSITE_MONTHS = 4;
+var AXIS_END_ISO = "2028-04-01";
+var C = {
+  letterbox: "#0B1324",
+  surface: "#0B1324",
+  labelCol: "#142038",
+  ink: "#F4F7FC",
+  ink2: "#D6DEEA",
+  ink3: "#AEB9CA",
+  grid: "#2C3A55",
+  gridFaint: "#162036",
+  rule: "#7D8BA3",
+  valid: "#3D7EFF",
+  past: "#FFA62B",
+  lead: "#7FA6EB",
+  escDays: "#FF5C5C",
+  onsite: "#2FCB6A",
+  warn: "#FFB65C",
+  badgeText: "#0B1324"
+};
+var DAY = 864e5;
+var MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function startOfDay(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+function parseDate(s) {
+  var p = s.split("-");
+  return new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+}
+function addDays(d, n) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+}
+function addMonths(d, n) {
+  return new Date(d.getFullYear(), d.getMonth() + n, d.getDate());
+}
+function fmtShort(d) {
+  return MON[d.getMonth()] + " " + d.getDate();
+}
+function fmtMY(d) {
+  return d.getMonth() + 1 + "/" + String(d.getFullYear()).slice(2);
+}
+function fmtRange(a, b) {
+  return fmtMY(a) + " to " + fmtMY(b);
+}
+var W = 1920;
+var H = 1080;
+var LABEL_W = 540;
+var PCT_W = 190;
+var CX0 = LABEL_W + PCT_W;
+var AXIS_PAD = 28;
+var XR = W - 16;
+var HDR_Y0 = 60;
+var TOP = 130;
+var BADGE_H = 40;
+var FS = 1.06;
+var TL = CX0 + 10;
+var TR = XR - 6;
+function fit(left, w) {
+  return Math.max(TL, Math.min(left, TR - w));
+}
+function computeRows(today) {
+  var out = [];
+  for (var n = 0; n < ITEMS.length; n++) {
+    var i = ITEMS[n];
+    var sent = parseDate(i.sent);
+    var daysSince = Math.round((today.getTime() - sent.getTime()) / DAY);
+    var over = Math.max(0, daysSince - VALIDITY_DAYS);
+    var shift = MOB_DAYS_PER_DAY * over;
+    var bars = [];
+    for (var k = 0; k < i.mobs.length; k++) {
+      var m = i.mobs[k];
+      var start = parseDate(m.start);
+      var end = m.end ? parseDate(m.end) : addMonths(start, m.months || ASSUMED_ONSITE_MONTHS);
+      var executed = m.executed === true;
+      var s = executed ? 0 : shift;
+      bars.push({ label: m.label, start, end, escStart: addDays(start, s), escEnd: addDays(end, s), executed, assumed: !m.end });
+    }
+    var monthsPast = Math.floor(over / MONTH_DAYS);
+    out.push({ i, sent, daysSince, over, shift, validityEnd: addDays(sent, VALIDITY_DAYS), bars, escPct: (Math.pow(1 + MONTHLY_RATE, monthsPast) - 1) * 100 });
+  }
+  return out;
+}
+function draw(ctx, font, today) {
+  function fnt(size, weight) {
+    ctx.font = weight + " " + (size * FS).toFixed(1) + "px " + font;
+  }
+  function tw(s, size, weight) {
+    fnt(size, weight);
+    return ctx.measureText(s).width;
+  }
+  function dash(d2) {
+    if (typeof ctx.setLineDash === "function") ctx.setLineDash(d2);
+  }
+  function rect(x2, y2, w2, h, color, r2) {
+    ctx.fillStyle = color;
+    if (r2 && w2 > 2 * r2) {
+      ctx.beginPath();
+      ctx.moveTo(x2 + r2, y2);
+      ctx.lineTo(x2 + w2 - r2, y2);
+      ctx.quadraticCurveTo(x2 + w2, y2, x2 + w2, y2 + r2);
+      ctx.lineTo(x2 + w2, y2 + h - r2);
+      ctx.quadraticCurveTo(x2 + w2, y2 + h, x2 + w2 - r2, y2 + h);
+      ctx.lineTo(x2 + r2, y2 + h);
+      ctx.quadraticCurveTo(x2, y2 + h, x2, y2 + h - r2);
+      ctx.lineTo(x2, y2 + r2);
+      ctx.quadraticCurveTo(x2, y2, x2 + r2, y2);
+      ctx.closePath();
+      ctx.fill();
+    } else ctx.fillRect(x2, y2, w2, h);
+  }
+  function line(x1, y1, x2, y2, color, width, d2) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    dash(d2 || []);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    dash([]);
+  }
+  function poly(pts, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(pts[0], pts[1]);
+    for (var k2 = 2; k2 < pts.length; k2 += 2) ctx.lineTo(pts[k2], pts[k2 + 1]);
+    ctx.closePath();
+    ctx.fill();
+  }
+  function text(s, x2, y2, size, weight, color, align) {
+    fnt(size, weight);
+    ctx.fillStyle = color;
+    ctx.textAlign = align || "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(s, x2, y2);
+  }
+  var rows = computeRows(today);
+  var ROW = Math.floor((H - TOP - BADGE_H) / rows.length);
+  var ROWS_END = TOP + ROW * rows.length;
+  var c2 = CX0 - 14;
+  var rangeStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  var rangeEnd = parseDate(AXIS_END_ISO);
+  var span = rangeEnd.getTime() - rangeStart.getTime();
+  function x(d2) {
+    return CX0 + AXIS_PAD + (d2.getTime() - rangeStart.getTime()) / span * (XR - CX0 - AXIS_PAD);
+  }
+  var XL = x(rangeStart);
+  function cx(d2) {
+    return Math.max(XL, x(d2));
+  }
+  var months = [];
+  for (var d = new Date(rangeStart.getTime()); d.getTime() < rangeEnd.getTime(); d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) months.push(d);
+  var step = Math.max(1, Math.ceil(months.length / 8));
+  var todayX = Math.max(TL + 56, Math.min(x(today), TR - 56));
+  var boxes = [];
+  function tlText(s, left2, y2, size, weight, color) {
+    var w2 = tw(s, size, weight);
+    text(s, left2, y2, size, weight, color);
+    boxes.push([left2, left2 + w2]);
+    return w2;
+  }
+  rect(0, 0, W, H, C.surface);
+  text("I-5 Proposal Pipeline", 16, 48, 44, 800, C.ink);
+  var legend = [
+    { label: "Validity (" + VALIDITY_DAYS + " days)", kind: "valid" },
+    { label: "Past validity", kind: "past" },
+    { label: "Lead time to mobilization", kind: "lead" },
+    { label: "Escalation days", kind: "esc" },
+    { label: "Onsite duration", kind: "onsite" }
+  ];
+  var lx = 560;
+  var cy = 34;
+  for (var li = 0; li < legend.length; li++) {
+    var l = legend[li];
+    if (l.kind === "valid") rect(lx, cy - 11, 42, 22, C.valid, 4);
+    if (l.kind === "past") rect(lx, cy - 11, 42, 22, C.past, 4);
+    if (l.kind === "lead") rect(lx, cy - 6, 42, 12, C.lead);
+    if (l.kind === "esc") rect(lx, cy - 9, 42, 18, C.escDays);
+    if (l.kind === "onsite") rect(lx, cy - 12, 42, 24, C.onsite, 4);
+    text(l.label, lx + 52, cy + 7, 20, 400, C.ink);
+    lx += 52 + tw(l.label, 20, 400) + 40;
+  }
+  rect(0, HDR_Y0, LABEL_W, ROWS_END - HDR_Y0, C.labelCol);
+  line(0, TOP, XR, TOP, C.grid, 1);
+  line(LABEL_W, HDR_Y0, LABEL_W, ROWS_END, C.rule, 2);
+  line(CX0, HDR_Y0, CX0, ROWS_END, C.rule, 2);
+  text("PROJECT", 16, TOP - 18, 24, 700, C.ink2);
+  text("Escalated", c2, TOP - 42, 24, 700, C.ink2, "right");
+  text("(.5% compounded", c2, TOP - 23, 17, 700, C.ink2, "right");
+  text("per month)", c2, TOP - 5, 17, 700, C.ink2, "right");
+  var n, r, y, mid;
+  for (n = 0; n < rows.length; n++) {
+    r = rows[n];
+    y = TOP + n * ROW;
+    mid = y + ROW / 2;
+    line(0, y + ROW, CX0, y + ROW, C.grid, 1);
+    line(CX0, y + ROW, XR, y + ROW, C.gridFaint, 1);
+    text(r.i.project, 16, mid - 6, 31, 700, C.ink);
+    text((r.i.startLabel || "Sent") + " " + fmtShort(r.sent) + "  |  Day " + r.daysSince, 16, mid + 30, 22, 400, r.over > 0 ? C.warn : C.ink3);
+    text(r.escPct.toFixed(1) + "%", c2, mid + 14, 40, 400, r.escPct > 0 ? C.warn : C.ink, "right");
+  }
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(CX0 + 2, HDR_Y0, XR - CX0 - 2, ROWS_END - HDR_Y0);
+  ctx.clip();
+  for (var t = 0; t < months.length; t += step) {
+    var md = months[t];
+    line(x(md), TOP - 8, x(md), ROWS_END, C.gridFaint, 1);
+    text(MON[md.getMonth()] + " " + String(md.getFullYear()).slice(2), Math.min(Math.max(x(md), TL + 40), TR - 40), TOP - 18, 23, 400, C.ink2, "center");
+  }
+  for (n = 0; n < rows.length; n++) {
+    r = rows[n];
+    y = TOP + n * ROW;
+    mid = y + ROW / 2;
+    var xs = cx(r.sent);
+    var cutLeft = x(r.sent) < XL;
+    var cutColor = r.validityEnd.getTime() > rangeStart.getTime() ? C.valid : r.over > 0 ? C.past : C.lead;
+    var shifted = r.shift > 0;
+    var multi = r.bars.length > 1;
+    var k, b;
+    for (k = 0; k < r.bars.length; k++) rect(xs, mid - 6.5, Math.max(0, x(r.bars[k].start) - xs), 13, C.lead);
+    if (x(r.validityEnd) > XL) rect(xs, mid - 18, Math.max(4, x(r.validityEnd) - xs), 36, C.valid, 5);
+    if (r.over > 0) rect(cx(r.validityEnd), mid - 18, Math.max(3, x(today) - cx(r.validityEnd)), 36, C.past, 5);
+    if (x(r.validityEnd) >= XL) line(x(r.validityEnd), mid - 24, x(r.validityEnd), mid + 24, C.ink, 3);
+    if (cutLeft) poly([XL - 20, mid, XL, mid - 19, XL, mid + 19], cutColor);
+    for (k = 0; k < r.bars.length; k++) {
+      b = r.bars[k];
+      var xa = x(b.escStart);
+      var xe = x(b.escEnd);
+      var clipped = xe > XR;
+      var barEnd = clipped ? XR - 22 : xe;
+      var ext = shifted && !b.executed;
+      if (ext) rect(x(b.start), mid - 11, Math.max(3, xa - x(b.start)), 22, C.escDays);
+      if (xa < XR) rect(xa, mid - 18, Math.max(4, barEnd - xa), 36, C.onsite, 4);
+      if (clipped && xa < XR - 22) poly([XR - 22, mid - 21, XR, mid, XR - 22, mid + 21], C.onsite);
+      var main = (multi ? b.label + " onsite " : "Onsite ") + fmtRange(b.escStart, b.escEnd) + (b.assumed ? " (est.)" : "") + (b.executed ? " (executed)" : "") + (clipped ? ", continues" : "");
+      var tail = ext ? "  +" + r.shift + " d escalation" : "";
+      var w = tw(main, 21, 700) + (tail ? tw(tail, 21, 400) : 0);
+      var ly = multi && k === 0 ? mid - 26 : mid + 46;
+      var left = fit(xa, w);
+      var w1 = tlText(main, left, ly, 21, 700, C.ink);
+      if (tail) tlText(tail, left + w1, ly, 21, 400, C.escDays);
+    }
+    if (r.bars.length === 0) tlText("Mobilization unconfirmed", fit(Math.max(x(today), x(r.validityEnd)) + 24, 320), mid + 8, 22, 400, C.warn);
+    var first = null;
+    for (k = 0; k < r.bars.length; k++) if (!first || r.bars[k].start.getTime() < first.start.getTime()) first = r.bars[k];
+    if (first) {
+      var mo = (first.start.getTime() - r.sent.getTime()) / DAY / 30.44;
+      var lt = mo.toFixed(1) + " mo to mobilization";
+      var lw = tw(lt, 20, 400);
+      var lc = (Math.max(x(r.validityEnd), x(today)) + x(first.start)) / 2;
+      tlText(lt, fit(lc - lw / 2, lw), mid - 26, 20, 400, C.ink2);
+    }
+  }
+  line(x(today), TOP - 6, x(today), ROWS_END, C.ink, 3, [8, 6]);
+  ctx.restore();
+  line(XR, HDR_Y0, XR, ROWS_END, C.rule, 2);
+  ctx.strokeStyle = "#FFFFFF";
+  ctx.lineWidth = 3;
+  dash([]);
+  ctx.strokeRect(1.5, HDR_Y0, XR - 1.5, ROWS_END - HDR_Y0);
+  rect(todayX - 56, ROWS_END + 5, 112, 34, C.ink, 6);
+  text("TODAY", todayX, ROWS_END + 30, 23, 700, C.badgeText, "center");
+  return boxes;
+}
+function drawFallback(ctx, today, msg) {
+  try {
+    ctx.fillStyle = NAVY;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
+    ctx.font = "bold 56px sans-serif";
+    ctx.fillText("I-5 Proposal Pipeline", 60, 110);
+    ctx.font = "30px sans-serif";
+    ctx.fillText("Simplified view (the full chart could not draw on this browser)", 60, 170);
+    var rows = computeRows(today);
+    for (var n = 0; n < rows.length; n++) {
+      var r = rows[n];
+      var mob = r.bars.length ? fmtMY(r.bars[r.bars.length - 1].escStart) : "unconfirmed";
+      ctx.font = "bold 40px sans-serif";
+      ctx.fillText(r.i.project, 60, 270 + n * 105);
+      ctx.font = "30px sans-serif";
+      ctx.fillText("Sent " + fmtShort(r.sent) + "  |  Day " + r.daysSince + "  |  Escalated " + r.escPct.toFixed(1) + "%  |  Mobilization " + mob, 60, 312 + n * 105);
+    }
+    ctx.font = "20px sans-serif";
+    ctx.fillStyle = "#AEB9CA";
+    ctx.fillText(String(msg).slice(0, 160), 60, 1050);
+  } catch (_e) {
+  }
+}
+var REV_SHARE = 0.13;
+var REV_HEAD = 33;
+var REV_ITEM = 31;
+var REV_LINE = 52;
+function reviewStackH() {
+  return 40 + REV_HEAD + 20 + Math.max(1, REVIEW_TODAY.length) * REV_LINE + 10;
+}
+function drawReview(ctx, font, x0, y0, maxW) {
+  if (REVIEW_TODAY.length === 0) return;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  var hs = REV_HEAD;
+  ctx.font = "800 " + hs + "px " + font;
+  while (hs > 14 && ctx.measureText("Review Today:").width > maxW) {
+    hs -= 1;
+    ctx.font = "800 " + hs + "px " + font;
+  }
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText("Review Today:", x0, y0 + hs);
+  for (var i = 0; i < REVIEW_TODAY.length; i++) {
+    var t = "\u2022 " + String(REVIEW_TODAY[i]);
+    var s = REV_ITEM;
+    ctx.font = "700 " + s + "px " + font;
+    while (s > 14 && ctx.measureText(t).width > maxW) {
+      s -= 1;
+      ctx.font = "700 " + s + "px " + font;
+    }
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText(t, x0, y0 + hs + 20 + (i + 1) * REV_LINE - 12);
+  }
+}
+var PANEL_U = 270;
+var EDGE = 5e-3;
+var GROW_MAX = 1.12;
+function layout(vw, vh) {
+  var landscape = vw > vh;
+  var frameW = Math.floor(landscape && vh >= 240 ? Math.min(vw, vh * 16 / 9) : vw);
+  var frameH = Math.floor(frameW * 9 / 16);
+  var fx = Math.floor((vw - frameW) / 2);
+  var hasReview = REVIEW_TODAY.length > 0;
+  if (!hasReview) {
+    var ek = frameW * 0.98 / W;
+    var eh = Math.max(frameH, vh);
+    var ey = landscape ? Math.max(0, Math.floor((eh - frameH) / 2)) : 0;
+    return {
+      portrait: !landscape,
+      canvasH: eh,
+      k: ek,
+      ox: fx + frameW * 0.01,
+      oy: ey + frameH * 0.01,
+      px: 0,
+      py: 0,
+      pw: 0,
+      fx: fx + frameW * 0.01,
+      fy: ey + frameH * 0.01,
+      fk: ek
+    };
+  }
+  if (!landscape) {
+    var pk = frameW * 0.98 / W;
+    var stackPx = Math.ceil(reviewStackH() * pk);
+    return {
+      portrait: true,
+      canvasH: Math.max(frameH + stackPx, vh),
+      k: pk,
+      ox: fx + frameW * 0.01,
+      oy: frameH * 0.01 + stackPx,
+      px: 16,
+      py: -reviewStackH() + 30,
+      pw: W - 32,
+      fx: fx + frameW * 0.01,
+      fy: frameH * 0.01,
+      fk: pk
+    };
+  }
+  var k0 = frameW * 0.98 * (1 - REV_SHARE) / W;
+  var kw = vw * (1 - 2 * EDGE) / (W + PANEL_U);
+  var kh = vh >= 240 ? vh * (1 - 2 * EDGE) / H : kw;
+  var k = Math.min(kw, kh, k0 * GROW_MAX);
+  var gw = k * (W + PANEL_U);
+  var gh = k * H;
+  var canvasH = Math.max(vh, Math.ceil(gh));
+  var gx = (vw - gw) / 2;
+  var gy = Math.max(0, (canvasH - gh) / 2);
+  var fy = Math.max(0, Math.floor((canvasH - frameH) / 2));
+  return {
+    portrait: false,
+    canvasH,
+    k,
+    ox: gx + PANEL_U * k,
+    oy: gy,
+    px: -PANEL_U + 8,
+    py: HDR_Y0 + 6,
+    pw: PANEL_U - 24,
+    fx: fx + frameW * 0.01,
+    fy: fy + frameH * 0.01,
+    fk: frameW * 0.98 / W
+  };
+}
+function readBox(el) {
+  var viewH = window.innerHeight || 0;
+  try {
+    if (window.visualViewport && window.visualViewport.height) viewH = window.visualViewport.height;
+  } catch (_e) {
+  }
+  if (!el) return { w: Math.floor(document.documentElement.clientWidth || window.innerWidth || 1280), h: Math.floor(viewH) };
+  var rc = el.getBoundingClientRect();
+  return { w: Math.floor(rc.width), h: Math.floor(viewH - Math.max(0, rc.top)) };
+}
+
+
+// ---- Standalone runtime (replaces the host kit and React) ----
+(function () {
+  var FONT = "Arial, Helvetica, sans-serif";
+  var cv = document.getElementById("c");
+  var loadedAt = new Date().getTime();
+  var RELOAD_BUSY_MS = 30 * 60 * 1000; // weekdays 6 AM to 7 PM Pacific
+  var RELOAD_QUIET_MS = 2 * 60 * 60 * 1000; // all other times
+
+  // Pacific time without Intl: US rules, DST from the 2nd Sunday of March to the 1st Sunday of November.
+  function nthSundayUTC(y, m, nth, hourUTC) {
+    var d = new Date(Date.UTC(y, m, 1, hourUTC));
+    var first = (7 - d.getUTCDay()) % 7;
+    return Date.UTC(y, m, 1 + first + 7 * (nth - 1), hourUTC);
+  }
+  function pacificParts(ms) {
+    var y = new Date(ms).getUTCFullYear();
+    var dst = ms >= nthSundayUTC(y, 2, 2, 10) && ms < nthSundayUTC(y, 10, 1, 9);
+    var p = new Date(ms + (dst ? -7 : -8) * 3600000);
+    return { day: p.getUTCDay(), hour: p.getUTCHours() };
+  }
+  function busyNow(ms) { var p = pacificParts(ms); return p.day >= 1 && p.day <= 5 && p.hour >= 6 && p.hour < 19; }
+
+  function render() {
+    var vw = Math.max(200, Math.floor(document.documentElement.clientWidth || window.innerWidth || 1280));
+    var vh = Math.max(120, Math.floor(window.innerHeight || 720));
+    var L = layout(vw, vh);
+    var today = startOfDay(new Date());
+    var dpr = Math.min(3, window.devicePixelRatio || 1);
+    var ctx = null;
+    try {
+      cv.style.width = vw + "px";
+      cv.style.height = L.canvasH + "px";
+      cv.width = Math.round(vw * dpr);
+      cv.height = Math.round(L.canvasH * dpr);
+      ctx = cv.getContext("2d");
+      if (!ctx) throw new Error("no 2d canvas");
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = C.letterbox;
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.setTransform(L.k * dpr, 0, 0, L.k * dpr, L.ox * dpr, L.oy * dpr);
+      var boxes = draw(ctx, FONT, today);
+      try { drawReview(ctx, FONT, L.px, L.py, L.pw); } catch (_e) { /* panel is optional */ }
+      window.__i5 = { ok: true, boxes: boxes, k: L.k, content: [L.ox + L.px * L.k, L.oy, (W - L.px) * L.k, H * L.k] };
+    } catch (err) {
+      if (ctx) {
+        try { ctx.restore(); } catch (_e2) { /* ignore */ }
+        ctx.setTransform(L.fk * dpr, 0, 0, L.fk * dpr, L.fx * dpr, L.fy * dpr);
+        drawFallback(ctx, today, String(err));
+      } else {
+        var m = document.getElementById("msg");
+        if (m) { m.style.display = "block"; m.textContent = "I-5 Proposal Pipeline could not draw on this browser: " + String(err); }
+      }
+      window.__i5 = { ok: false, error: String(err), boxes: [] };
+    }
+  }
+
+  var pending = 0;
+  function soon() { if (pending) window.clearTimeout(pending); pending = window.setTimeout(function () { pending = 0; render(); }, 150); }
+  window.addEventListener("resize", soon);
+  window.addEventListener("orientationchange", soon);
+  document.addEventListener("fullscreenchange", soon);
+  document.addEventListener("webkitfullscreenchange", soon);
+
+  // Every minute: redraw from the current date, and reload when the interval for this time of day has passed.
+  window.setInterval(function () {
+    var nowMs = new Date().getTime();
+    var due = busyNow(nowMs) ? RELOAD_BUSY_MS : RELOAD_QUIET_MS;
+    if (nowMs - loadedAt >= due - 1000) {
+      try { window.scrollTo(0, 0); window.location.reload(); return; } catch (_e) { /* keep drawing */ }
+    }
+    render();
+  }, 60 * 1000);
+
+  try { if ("scrollRestoration" in history) history.scrollRestoration = "manual"; } catch (_e) { /* ignore */ }
+  try { window.scrollTo(0, 0); } catch (_e) { /* ignore */ }
+  render();
+})();
+
+} catch (err) {
+  var m0 = document.getElementById("msg");
+  if (m0) { m0.style.display = "block"; m0.textContent = "I-5 Proposal Pipeline could not start on this browser: " + String(err); }
+}
+</script>
+</body>
+</html>
