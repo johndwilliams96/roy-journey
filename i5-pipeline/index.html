@@ -33,8 +33,13 @@ var ITEMS = [
     { label: "1st Flr", start: "2027-07-17", end: "2028-12-25", monthOnly: false }
   ] },
   { id: "P6", project: "Natsukashii Decor Package", sent: "2026-09-25", mobs: [{ label: "Onsite", start: "2028-02-01", monthOnly: true }] },
-  // Base, Mid and Cadillac merged into one row per John: all sent 11/2/26, mobilization Nov 2027, assumed 4 months onsite.
-  { id: "P8-10", project: "Kickapoo 3 Options", sent: "2026-11-02", mobs: [{ label: "Onsite", start: "2027-11-01", monthOnly: true }] },
+  // Base, Mid and Cadillac merged into one row per John: preliminary schedule to Aaron dated 11/4/26, assumed 4 months onsite.
+  // Mobilization per the Kickapoo preliminary schedule PDF: Base 12/27/27, Mid 3/13/28, Cadillac 5/22/28.
+  { id: "P8-10", project: "Kickapoo 3 Options", sent: "2026-11-04", mobs: [
+    { label: "Base", start: "2027-12-27", monthOnly: false },
+    { label: "Mid", start: "2028-03-13", monthOnly: false },
+    { label: "Cadillac", start: "2028-05-22", monthOnly: false }
+  ] },
   { id: "P2", project: "Cahuilla", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-11-01", monthOnly: true }] }
 ];
 
@@ -285,10 +290,16 @@ function draw(ctx, font, today) {
       if (ext) rect(x(b.start), mid - 11, Math.max(3, xa - x(b.start)), 22, C.escDays);
       if (xa < XR) rect(xa, mid - 18, Math.max(4, barEnd - xa), 36, C.onsite, 4);
       if (clipped && xa < XR - 22) poly([XR - 22, mid - 21, XR, mid, XR - 22, mid + 21], C.onsite);
+      if (r.bars.length > 2 && k > 0) continue;
       var main = (multi ? b.label + " onsite " : "Onsite ") + fmtRange(b.escStart, b.escEnd) + (b.assumed ? " (est.)" : "") + (b.executed ? " (executed)" : "") + (clipped ? ", continues" : "");
+      if (r.bars.length > 2) {
+        main = "Mobilization: ";
+        for (var q = 0; q < r.bars.length; q++) main += (q ? ", " : "") + r.bars[q].label + " " + fmtMY(r.bars[q].escStart);
+        main += r.bars[0].assumed ? " (4 mo onsite est. each)" : "";
+      }
       var tail = ext ? "  +" + r.shift + " d escalation" : "";
       var w = tw(main, 21, 700) + (tail ? tw(tail, 21, 400) : 0);
-      var ly = multi && k === 0 ? mid - 26 : mid + 46;
+      var ly = multi && k === 0 && r.bars.length < 3 ? mid - 26 : mid + 46;
       var left = fit(xa, w);
       var w1 = tlText(main, left, ly, 21, 700, C.ink);
       if (tail) tlText(tail, left + w1, ly, 21, 400, C.escDays);
