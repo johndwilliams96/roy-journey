@@ -33,12 +33,13 @@ var ITEMS = [
     { label: "1st Flr", start: "2027-07-17", end: "2028-12-25", monthOnly: false }
   ] },
   { id: "P6", project: "Natsukashii Decor Package", sent: "2026-09-25", mobs: [{ label: "Onsite", start: "2028-02-01", monthOnly: true }] },
-  // Base, Mid and Cadillac merged into one row per John: preliminary schedule to Aaron dated 11/4/26, assumed 4 months onsite.
-  // Mobilization per the Kickapoo preliminary schedule PDF: Base 12/27/27, Mid 3/13/28, Cadillac 5/22/28.
+  // Base, Mid and Cadillac merged into one row per John: finalized 3-option schedule sent to client 11/4/26.
+  // Mobilize Onsite per Kickapoo_Preliminary Schedule_3 Options_11.3.2026.pdf Rev. 11/4/2026:
+  // Base and Mid Sun 12/5/27; Cadillac Sun 12/12/27. Onsite ends at Grand Opening: Base 2/6/28, Mid 6/4/28, Cadillac 7/23/28.
   { id: "P8-10", project: "Kickapoo 3 Options", sent: "2026-11-04", mobs: [
-    { label: "Base", start: "2027-12-27", monthOnly: false },
-    { label: "Mid", start: "2028-03-13", monthOnly: false },
-    { label: "Cadillac", start: "2028-05-22", monthOnly: false }
+    { label: "Base", start: "2027-12-05", end: "2028-02-06", monthOnly: false },
+    { label: "Mid", start: "2027-12-05", end: "2028-06-04", monthOnly: false },
+    { label: "Cadillac", start: "2027-12-12", end: "2028-07-23", monthOnly: false }
   ] },
   { id: "P2", project: "Cahuilla", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-11-01", monthOnly: true }] }
 ];
@@ -287,15 +288,23 @@ function draw(ctx, font, today) {
       var clipped = xe > XR;
       var barEnd = clipped ? XR - 22 : xe;
       var ext = shifted && !b.executed;
-      if (ext) rect(x(b.start), mid - 11, Math.max(3, xa - x(b.start)), 22, C.escDays);
-      if (xa < XR) rect(xa, mid - 18, Math.max(4, barEnd - xa), 36, C.onsite, 4);
-      if (clipped && xa < XR - 22) poly([XR - 22, mid - 21, XR, mid, XR - 22, mid + 21], C.onsite);
+      var stack = r.bars.length > 2;
+      var bh = stack ? 12 : 36;
+      var by = stack ? mid - (r.bars.length * 14 - 2) / 2 + k * 14 : mid - 18;
+      if (ext) rect(x(b.start), by + (stack ? 0 : 7), Math.max(3, xa - x(b.start)), stack ? bh : 22, C.escDays);
+      if (xa < XR) rect(xa, by, Math.max(4, barEnd - xa), bh, C.onsite, stack ? 2 : 4);
+      if (clipped && xa < XR - 22) poly([XR - 22, by - 3, XR, by + bh / 2, XR - 22, by + bh + 3], C.onsite);
       if (r.bars.length > 2 && k > 0) continue;
       var main = (multi ? b.label + " onsite " : "Onsite ") + fmtRange(b.escStart, b.escEnd) + (b.assumed ? " (est.)" : "") + (b.executed ? " (executed)" : "") + (clipped ? ", continues" : "");
       if (r.bars.length > 2) {
         main = "Mobilization: ";
-        for (var q = 0; q < r.bars.length; q++) main += (q ? ", " : "") + r.bars[q].label + " " + fmtMY(r.bars[q].escStart);
-        main += r.bars[0].assumed ? " (4 mo onsite est. each)" : "";
+        for (var q = 0; q < r.bars.length; q++) {
+          var md = r.bars[q].escStart;
+          main += (q ? ", " : "") + r.bars[q].label + " " + (md.getMonth() + 1) + "/" + md.getDate();
+        }
+        var anyAssumed = false;
+        for (var qa = 0; qa < r.bars.length; qa++) if (r.bars[qa].assumed) anyAssumed = true;
+        if (anyAssumed) main += " (4 mo onsite est. each)";
       }
       var tail = ext ? "  +" + r.shift + " d escalation" : "";
       var w = tw(main, 21, 700) + (tail ? tw(tail, 21, 400) : 0);
