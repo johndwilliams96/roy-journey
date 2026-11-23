@@ -28,7 +28,8 @@ var ITEMS = [
   // John 11/3/26: 5 months onsite (4 assumed + 1)
   { id: "P4", project: "Muckleshoot High Limit", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-10-01", months: 5, monthOnly: true }] },
   // Escalation starts at expected execution 10/15/26 per John (actual send 2026-08-28). Onsite dates per Attachment D schedule (8/27/26).
-  { id: "P5", project: "River Spirit", sent: "2026-10-15", startLabel: "Exec start", mobs: [
+  // Contract approved per John 11/23/2026: awarded, so escalation is frozen (no added days, 0.0%).
+  { id: "P5", project: "River Spirit", sent: "2026-10-15", startLabel: "Exec start", awarded: "2026-11-23", mobs: [
     { label: "2nd Flr", start: "2027-04-17", end: "2027-06-26", monthOnly: false, executed: true },
     { label: "1st Flr", start: "2027-07-17", end: "2028-12-25", monthOnly: false }
   ] },
@@ -125,7 +126,7 @@ function computeRows(today) {
     var i = ITEMS[n];
     var sent = parseDate(i.sent);
     var daysSince = Math.round((today.getTime() - sent.getTime()) / DAY);
-    var over = Math.max(0, daysSince - VALIDITY_DAYS);
+    var over = i.awarded ? 0 : Math.max(0, daysSince - VALIDITY_DAYS);
     var shift = MOB_DAYS_PER_DAY * over;
     var bars = [];
     for (var k = 0; k < i.mobs.length; k++) {
@@ -256,7 +257,7 @@ function draw(ctx, font, today) {
     line(0, y + ROW, CX0, y + ROW, C.grid, 1);
     line(CX0, y + ROW, XR, y + ROW, C.gridFaint, 1);
     text(r.i.project, 16, mid - 6, 31, 700, C.ink);
-    text((r.i.startLabel || "Sent") + " " + fmtShort(r.sent) + "  |  Day " + r.daysSince, 16, mid + 30, 22, 400, r.over > 0 ? C.warn : C.ink3);
+    text(r.i.awarded ? "AWARDED " + fmtShort(parseDate(r.i.awarded)) + "  |  contract approved" : (r.i.startLabel || "Sent") + " " + fmtShort(r.sent) + "  |  Day " + r.daysSince, 16, mid + 30, 22, r.i.awarded ? 700 : 400, r.over > 0 ? C.warn : r.i.awarded ? C.onsite : C.ink3);
     text(r.escPct.toFixed(1) + "%", c2, mid + 14, 40, 400, r.escPct > 0 ? C.warn : C.ink, "right");
   }
   ctx.save();
@@ -297,7 +298,7 @@ function draw(ctx, font, today) {
       if (xa < XR) rect(xa, by, Math.max(4, barEnd - xa), bh, C.onsite, stack ? 2 : 4);
       if (clipped && xa < XR - 22) poly([XR - 22, by - 3, XR, by + bh / 2, XR - 22, by + bh + 3], C.onsite);
       if (r.bars.length > 2 && k > 0) continue;
-      var main = (multi ? b.label + " onsite " : "Onsite ") + fmtRange(b.escStart, b.escEnd) + (b.assumed ? " (est.)" : "") + (b.executed ? " (executed)" : "") + (clipped ? ", continues" : "");
+      var main = (multi ? b.label + " onsite " : "Onsite ") + fmtRange(b.escStart, b.escEnd) + (b.assumed ? " (est.)" : "") + (b.executed ? " (executed)" : r.i.awarded ? " (awarded)" : "") + (clipped ? ", continues" : "");
       if (r.bars.length > 2) {
         main = "Mobilization: ";
         for (var q = 0; q < r.bars.length; q++) {
@@ -382,19 +383,32 @@ function drawReview(ctx, font, x0, y0, maxW) {
   }
   ctx.fillStyle = "#FFFFFF";
   ctx.fillText("Review Today:", x0, y0 + hs);
+  var yy = y0 + hs + 20;
+  ctx.font = "700 " + REV_ITEM + "px " + font;
+  ctx.fillStyle = "#FFFFFF";
+  var indent = ctx.measureText("\u2022 ").width;
   for (var i = 0; i < REVIEW_TODAY.length; i++) {
-    var t = "\u2022 " + String(REVIEW_TODAY[i]);
-    var s = REV_ITEM;
-    ctx.font = "700 " + s + "px " + font;
-    while (s > 14 && ctx.measureText(t).width > maxW) {
-      s -= 1;
-      ctx.font = "700 " + s + "px " + font;
+    var words = String(REVIEW_TODAY[i]).split(" ");
+    var line = "";
+    var first = true;
+    for (var wi = 0; wi < words.length; wi++) {
+      var trial = line ? line + " " + words[wi] : words[wi];
+      if (line && ctx.measureText(trial).width + indent > maxW) {
+        yy += REV_LINE;
+        ctx.fillText(first ? "\u2022 " : "", x0, yy - 12);
+        ctx.fillText(line, x0 + indent, yy - 12);
+        first = false;
+        line = words[wi];
+      } else {
+        line = trial;
+      }
     }
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(t, x0, y0 + hs + 20 + (i + 1) * REV_LINE - 12);
+    yy += REV_LINE;
+    ctx.fillText(first ? "\u2022 " : "", x0, yy - 12);
+    ctx.fillText(line, x0 + indent, yy - 12);
   }
 }
-var PANEL_U = 270;
+var PANEL_U = 440;
 var EDGE = 5e-3;
 var GROW_MAX = 1.12;
 function layout(vw, vh) {
