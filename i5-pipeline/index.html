@@ -29,7 +29,7 @@ var ITEMS = [
   { id: "P4", project: "Muckleshoot High Limit", sent: "2026-11-18", mobs: [{ label: "Onsite", start: "2027-10-01", months: 5, monthOnly: true }] },
   // Escalation starts at expected execution 10/15/26 per John (actual send 2026-08-28). Onsite dates per Attachment D schedule (8/27/26).
   // Contract approved per John 11/23/2026: awarded, so escalation is frozen (no added days, 0.0%).
-  { id: "P5", project: "River Spirit", sent: "2026-10-15", startLabel: "Exec start", awarded: "2026-11-23", mobs: [
+  { id: "P5", project: "River Spirit", sent: "2026-10-15", startLabel: "Exec start", awarded: "2026-11-23", awardNote: "contract approved", mobs: [
     { label: "2nd Flr", start: "2027-04-17", end: "2027-06-26", monthOnly: false, executed: true },
     { label: "1st Flr", start: "2027-07-17", end: "2028-12-25", monthOnly: false }
   ] },
@@ -43,7 +43,8 @@ var ITEMS = [
     { label: "Cadillac", start: "2027-12-12", end: "2028-07-23", monthOnly: false }
   ] },
   // Sent 11/17/26 confirmed by John. Mobilization Sep 2027 (month only; stored 2027-09-01). Assumed 4 months onsite.
-  { id: "P11", project: "Grey Rock Decor Package", sent: "2026-11-17", mobs: [{ label: "Onsite", start: "2027-09-01", monthOnly: true }] },
+  // Awarded per John 11/24/2026: escalation frozen (no added days, 0.0%).
+  { id: "P11", project: "Grey Rock Decor Package", sent: "2026-11-17", awarded: "2026-11-24", mobs: [{ label: "Onsite", start: "2027-09-01", monthOnly: true }] },
   { id: "P2", project: "Cahuilla", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-11-01", monthOnly: true }] }
 ];
 
@@ -257,7 +258,7 @@ function draw(ctx, font, today) {
     line(0, y + ROW, CX0, y + ROW, C.grid, 1);
     line(CX0, y + ROW, XR, y + ROW, C.gridFaint, 1);
     text(r.i.project, 16, mid - 6, 31, 700, C.ink);
-    text(r.i.awarded ? "AWARDED " + fmtShort(parseDate(r.i.awarded)) + "  |  contract approved" : (r.i.startLabel || "Sent") + " " + fmtShort(r.sent) + "  |  Day " + r.daysSince, 16, mid + 30, 22, r.i.awarded ? 700 : 400, r.over > 0 ? C.warn : r.i.awarded ? C.onsite : C.ink3);
+    text(r.i.awarded ? "AWARDED " + fmtShort(parseDate(r.i.awarded)) + (r.i.awardNote ? "  |  " + r.i.awardNote : "") : (r.i.startLabel || "Sent") + " " + fmtShort(r.sent) + "  |  Day " + r.daysSince, 16, mid + 30, 22, r.i.awarded ? 700 : 400, r.over > 0 ? C.warn : r.i.awarded ? C.onsite : C.ink3);
     text(r.escPct.toFixed(1) + "%", c2, mid + 14, 40, 400, r.escPct > 0 ? C.warn : C.ink, "right");
   }
   ctx.save();
