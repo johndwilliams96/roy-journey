@@ -29,7 +29,7 @@ var ITEMS = [
   { id: "P4", project: "Muckleshoot High Limit", sent: "2026-11-18", mobs: [{ label: "Onsite", start: "2027-10-01", months: 5, monthOnly: true }] },
   // Escalation starts at expected execution 10/15/26 per John (actual send 2026-08-28). Onsite dates per Attachment D schedule (8/27/26).
   // Contract approved per John 11/23/2026: awarded, so escalation is frozen (no added days, 0.0%).
-  { id: "P5", project: "River Spirit", sent: "2026-10-15", startLabel: "Exec start", awarded: "2026-11-23", awardNote: "contract approved", mobs: [
+  { id: "P5", project: "River Spirit", sent: "2026-10-15", startLabel: "Exec start", awarded: "2026-11-23", mobs: [
     { label: "2nd Flr", start: "2027-04-17", end: "2027-06-26", monthOnly: false, executed: true },
     { label: "1st Flr", start: "2027-07-17", end: "2028-12-25", monthOnly: false }
   ] },
@@ -261,7 +261,7 @@ function draw(ctx, font, today) {
     line(0, y + ROW, CX0, y + ROW, C.grid, 1);
     line(CX0, y + ROW, XR, y + ROW, C.gridFaint, 1);
     text(r.i.project, 16, mid - 6, 31, 700, C.ink);
-    text(r.i.awarded ? "AWARDED " + fmtShort(parseDate(r.i.awarded)) + (r.i.awardNote ? "  |  " + r.i.awardNote : "") : (r.i.startLabel || "Sent") + " " + fmtShort(r.sent) + "  |  Day " + r.daysSince, 16, mid + 30, 22, r.i.awarded ? 700 : 400, r.over > 0 ? C.warn : r.i.awarded ? C.onsite : C.ink3);
+    text(r.i.awarded ? "AWARDED" : (r.i.startLabel || "Sent") + " " + fmtShort(r.sent) + "  |  Day " + r.daysSince, 16, mid + 30, 22, r.i.awarded ? 700 : 400, r.over > 0 ? C.warn : r.i.awarded ? C.onsite : C.ink3);
     text(r.escPct.toFixed(1) + "%", c2, mid + 14, 40, 400, r.escPct > 0 ? C.warn : C.ink, "right");
   }
   ctx.save();
@@ -302,7 +302,7 @@ function draw(ctx, font, today) {
       if (xa < XR) rect(xa, by, Math.max(4, barEnd - xa), bh, C.onsite, stack ? 2 : 4);
       if (clipped && xa < XR - 22) poly([XR - 22, by - 3, XR, by + bh / 2, XR - 22, by + bh + 3], C.onsite);
       if (r.bars.length > 2 && k > 0) continue;
-      var main = (multi ? b.label + " onsite " : "Onsite ") + fmtRange(b.escStart, b.escEnd) + (b.assumed ? " (est.)" : "") + (b.executed ? " (executed)" : r.i.awarded ? " (awarded)" : "") + (clipped ? ", continues" : "");
+      var main = (multi ? b.label + " onsite " : "Onsite ") + fmtRange(b.escStart, b.escEnd) + (b.assumed ? " (est.)" : "") + (b.executed ? " (executed)" : "") + (clipped ? ", continues" : "");
       if (r.bars.length > 2) {
         main = "Mobilization: ";
         for (var q = 0; q < r.bars.length; q++) {
