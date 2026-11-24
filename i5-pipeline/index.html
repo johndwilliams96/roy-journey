@@ -20,7 +20,7 @@ canvas { display: block; background: #0B1324; }
 <noscript><div style="padding:40px;font:bold 32px Arial,Helvetica,sans-serif;color:#fff">I-5 Proposal Pipeline needs JavaScript.</div></noscript>
 <script>
 // ===== DATA (generated from the Page source by build_tv.py; edit there or here) =====
-var REVIEW_TODAY = [];
+var REVIEW_TODAY = ["Natsukashii Review"];
 var ITEMS = [
   // Onsite Sept 2027 to Project Completion July 2028 per the Spirit Mountain Phase 2 booklet roadmap (10/20/2026).
   { id: "P1", project: "Spirit Mountain Phase 2", sent: "2026-10-20", mobs: [{ label: "Onsite", start: "2027-09-01", end: "2028-07-01", monthOnly: true }] },
@@ -123,8 +123,11 @@ function fit(left, w) {
 }
 function computeRows(today) {
   var out = [];
-  for (var n = 0; n < ITEMS.length; n++) {
-    var i = ITEMS[n];
+  var list = [];
+  for (var a = 0; a < ITEMS.length; a++) if (ITEMS[a].awarded) list.push(ITEMS[a]);
+  for (var b2 = 0; b2 < ITEMS.length; b2++) if (!ITEMS[b2].awarded) list.push(ITEMS[b2]);
+  for (var n = 0; n < list.length; n++) {
+    var i = list[n];
     var sent = parseDate(i.sent);
     var daysSince = Math.round((today.getTime() - sent.getTime()) / DAY);
     var over = i.awarded ? 0 : Math.max(0, daysSince - VALIDITY_DAYS);
